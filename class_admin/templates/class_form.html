@@ -18,7 +18,6 @@
   <span>{% if cls %}Edit{% else %}Add{% endif %}</span>
 </div>
 
-<!-- Live Now info box -->
 <div class="alert alert-info" style="margin-bottom:16px">
   <span>ℹ</span>
   <span>
@@ -31,7 +30,6 @@
 <form method="POST" action="{% if cls %}{% url 'admin_class_edit' cls.pk %}{% else %}{% url 'admin_class_add' %}{% endif %}">
 {% csrf_token %}
 
-<!-- ── CLASS INFO ── -->
 <div class="form-card">
   <div class="form-section-title">Class information</div>
   <div class="form-grid">
@@ -80,7 +78,6 @@
         <option value="{{ val }}" {% if d.thumb_style == val %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
-      <!-- mini preview -->
       <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
         <div class="thumb-preview {% if d.thumb_style %}{{ d.thumb_style }}{% else %}ct1{% endif %}" id="cls-prev"
              style="height:60px;width:80px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
@@ -93,7 +90,6 @@
   </div>
 </div>
 
-<!-- ── SCHEDULE ── -->
 <div class="form-card">
   <div class="form-section-title">Schedule &amp; type</div>
   <div class="form-grid">
@@ -148,7 +144,6 @@
   </div>
 </div>
 
-<!-- ── PUBLISH ── -->
 <div class="form-card">
   <div class="form-section-title">Visibility</div>
   <div class="check-group" style="margin-bottom:16px">

@@ -2,12 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # auth
-    path("",   views.admin_login,  name="admin_login"),
-    path("logout/",  views.admin_logout, name="admin_logout"),
-
-    # dashboard
-    path("dashboard/",                      views.dashboard,    name="admin_dashboard"),
+    path("",                           views.admin_login,  name="admin_login"),
+    path("logout/",                    views.admin_logout, name="admin_logout"),
+    path("dashboard/",                 views.dashboard,    name="admin_dashboard"),
 
     # banners
     path("banners/",                      views.banner_list,   name="admin_banners"),

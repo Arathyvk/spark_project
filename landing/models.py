@@ -199,6 +199,7 @@ class FreeContent(models.Model):
     course      = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="free_content")
     title       = models.CharField(max_length=200)
     content_type= models.CharField(max_length=10, choices=TYPE_CHOICES)
+    sort_order = models.PositiveIntegerField(default=0)
     url         = models.URLField()
     is_active   = models.BooleanField(default=True)
     created_at  = models.DateTimeField(auto_now_add=True)

@@ -1,0 +1,153 @@
+{% extends "admin_base.html" %}
+{% block title %}Free Content{% endblock %}
+{% block nav_free %}active{% endblock %}
+{% block page_title %}Free Content Manager{% endblock %}
+{% block page_sub %}Videos and PDF notes — homepage counters update automatically from this list{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+
+  <a href="{% url 'admin_free_content_add' %}" class="tb-btn">+ Add Item</a>
+
+<style>
+.fc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:800px){.fc-stats{grid-template-columns:repeat(2,1fr)}}
+.fc-stat{background:white;border:1px solid var(--bl6);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:center}
+.fc-stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.si-v{background:var(--bl7)}.si-p{background:var(--goldlt)}.si-a{background:var(--greenlt)}.si-i{background:var(--redlt)}
+.fc-stat-info .num{font-size:22px;font-weight:800;color:var(--gray5)}
+.fc-stat-info .lbl{font-size:11px;color:var(--gray3);font-weight:500;margin-top:1px}
+
+.type-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px}
+.tb-video{background:var(--bl7);color:var(--bl)}.tb-pdf{background:var(--goldlt);color:var(--gold)}
+.active-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:2px}
+.dot-on{background:var(--green)}.dot-off{background:var(--gray3)}
+.url-cell{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--bl2)}
+.url-cell a{color:inherit;text-decoration:none}
+.url-cell a:hover{text-decoration:underline}
+</style>
+
+<div class="fc-stats">
+  <div class="fc-stat">
+    <div class="fc-stat-icon si-v">▶</div>
+    <div class="fc-stat-info">
+      <div class="num">{{ video_count }}</div>
+      <div class="lbl">Active videos</div>
+    </div>
+  </div>
+  <div class="fc-stat">
+    <div class="fc-stat-icon si-p">📄</div>
+    <div class="fc-stat-info">
+      <div class="num">{{ pdf_count }}</div>
+      <div class="lbl">Active PDFs</div>
+    </div>
+  </div>
+  <div class="fc-stat">
+    <div class="fc-stat-icon si-a">✓</div>
+    <div class="fc-stat-info">
+      <div class="num">{{ items|length }}</div>
+      <div class="lbl">Shown (current filter)</div>
+    </div>
+  </div>
+  <div class="fc-stat">
+    <div class="fc-stat-info">
+      <div class="num" style="font-size:14px;color:var(--green)">Auto-synced</div>
+      <div class="lbl">"{{ video_count }}+ videos · {{ pdf_count }}+ PDFs"</div>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+  <a href="{% url 'admin_free_content' %}" class="filter-pill {% if not type_filter and not active_filter %}active{% endif %}">All</a>
+  <a href="{% url 'admin_free_content' %}?type=video" class="filter-pill {% if type_filter == 'video' %}active{% endif %}">▶ Videos</a>
+  <a href="{% url 'admin_free_content' %}?type=pdf"   class="filter-pill {% if type_filter == 'pdf'   %}active{% endif %}">📄 PDFs</a>
+  <a href="{% url 'admin_free_content' %}?active=1"  class="filter-pill {% if active_filter == '1'  %}active{% endif %}">Active only</a>
+  <a href="{% url 'admin_free_content' %}?active=0"  class="filter-pill {% if active_filter == '0'  %}active{% endif %}">Inactive</a>
+</div>
+
+<div class="card">
+  <div class="card-hd">
+    <span class="card-title">{{ items|length }} item{{ items|length|pluralize }}</span>
+    <a href="{% url 'admin_free_content_add' %}" class="card-action">+ Add Item</a>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>sl no</th>
+          <th>Title</th>
+          <th>Type</th>
+          <th>URL</th>
+          <th>Course</th>
+          <th>Duration</th>
+          <th>Order</th>
+          <th>Active</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td style="color:var(--gray3)">{{ item.pk }}</td>
+          <td>
+            <div style="font-weight:700;color:var(--gray5);max-width:200px">{{ item.title|truncatechars:36 }}</div>
+            {% if item.description %}
+            <div style="font-size:10px;color:var(--gray3);margin-top:1px">{{ item.description|truncatechars:50 }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <span class="type-badge {% if item.content_type == 'video' %}tb-video{% else %}tb-pdf{% endif %}">
+              {% if item.content_type == 'video' %}▶ Video{% else %}📄 PDF{% endif %}
+            </span>
+          </td>
+          <td class="url-cell">
+            <a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.url|truncatechars:40 }}</a>
+          </td>
+          <td style="font-size:11px">
+            {% if item.course %}
+              <span style="font-weight:600">{{ item.course.short_label }}</span>
+              <div style="font-size:10px;color:var(--gray3)">{{ item.course.name|truncatechars:22 }}</div>
+            {% else %}
+              <span style="color:var(--gray3)">Standalone</span>
+            {% endif %}
+          </td>
+          <td style="font-size:11px">
+            {% if item.duration_display %}{{ item.duration_display }}
+            {% else %}<span style="color:var(--gray3)">—</span>{% endif %}
+          </td>
+          <td style="font-size:12px;font-weight:600;color:var(--gray4)">{{ item.sort_order }}</td>
+          <td>
+            <span class="active-dot {% if item.is_active %}dot-on{% else %}dot-off{% endif %}"></span>
+            {% if item.is_active %}
+              <span style="font-size:11px;color:var(--green);font-weight:600">Active</span>
+            {% else %}
+              <span style="font-size:11px;color:var(--gray3)">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="acts">
+              <a href="{% url 'admin_free_content_edit' item.pk %}" class="act act-bl">Edit</a>
+              <a href="{% url 'admin_free_content_toggle' item.pk %}" class="act {% if item.is_active %}act-rd{% else %}act-gr{% endif %}">
+                {% if item.is_active %}Hide{% else %}Show{% endif %}
+              </a>
+              <form method="POST" action="{% url 'admin_free_content_delete' item.pk %}" style="display:inline"
+                    onsubmit="return confirm('Delete {{ item.title }}?')">
+                {% csrf_token %}
+                <button type="submit" class="act act-rd">Del</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" style="text-align:center;padding:36px;color:var(--gray3)">
+            No items yet. <a href="{% url 'admin_free_content_add' %}" style="color:var(--bl)">Add one →</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+{% endblock %}

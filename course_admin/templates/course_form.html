@@ -22,7 +22,6 @@
 <form method="POST" action="{% if course %}{% url 'admin_course_edit' course.pk %}{% else %}{% url 'admin_course_add' %}{% endif %}">
 {% csrf_token %}
 
-<!-- ── BASIC INFO ── -->
 <div class="form-card">
   <div class="form-section-title">Basic information</div>
   <div class="form-grid">
@@ -75,7 +74,6 @@
   </div>
 </div>
 
-<!-- ── THUMBNAIL ── -->
 <div class="form-card">
   <div class="form-section-title">Thumbnail card</div>
   <div class="form-grid">
@@ -118,7 +116,6 @@
   </div>
 </div>
 
-<!-- ── PRICING ── -->
 <div class="form-card">
   <div class="form-section-title">Pricing</div>
   <div class="form-grid-3">
@@ -148,7 +145,6 @@
   </div>
 </div>
 
-<!-- ── FLAGS & STATUS ── -->
 <div class="form-card">
   <div class="form-section-title">Tags, visibility &amp; status</div>
 
