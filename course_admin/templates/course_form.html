@@ -1,0 +1,228 @@
+{% extends "admin_base.html" %}
+{% block title %}{% if course %}Edit Course{% else %}Add Course{% endif %}{% endblock %}
+{% block nav_courses %}active{% endblock %}
+{% block page_title %}{% if course %}Edit Course{% else %}Add Course{% endif %}{% endblock %}
+{% block page_sub %}{% if course %}Update details for {{ course.name }}{% else %}Fill in all fields and save{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+
+  <a href="{% url 'admin_courses' %}" class="tb-btn outline">← Back to Courses</a>
+
+{% with d=post|default:course %}
+
+<div class="breadcrumb">
+  <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+  <span>›</span>
+  <a href="{% url 'admin_courses' %}">Courses</a>
+  <span>›</span>
+  <span>{% if course %}Edit{% else %}Add{% endif %}</span>
+</div>
+
+<form method="POST" action="{% if course %}{% url 'admin_course_edit' course.pk %}{% else %}{% url 'admin_course_add' %}{% endif %}">
+{% csrf_token %}
+
+<!-- ── BASIC INFO ── -->
+<div class="form-card">
+  <div class="form-section-title">Basic information</div>
+  <div class="form-grid">
+
+    <div class="form-group {% if errors.name %}field-err{% endif %}">
+      <label class="form-label">Course Name <span class="req">*</span></label>
+      <input type="text" name="name" id="id_name" class="form-control"
+             value="{{ d.name|default:'' }}"
+             placeholder="e.g. Mission SCERT – Complete PSC Preparation"
+             oninput="autoSlug(this.value)">
+      {% if errors.name %}<span class="form-error">{{ errors.name }}</span>{% endif %}
+    </div>
+
+    <div class="form-group {% if errors.slug %}field-err{% endif %}">
+      <label class="form-label">URL Slug <span class="req">*</span></label>
+      <input type="text" name="slug" id="id_slug" class="form-control"
+             value="{{ d.slug|default:'' }}"
+             placeholder="auto-generated from name">
+      <span class="form-hint">Used in the course URL. Auto-fills from name.</span>
+      {% if errors.slug %}<span class="form-error">{{ errors.slug }}</span>{% endif %}
+    </div>
+
+    <div class="form-group {% if errors.level %}field-err{% endif %}">
+      <label class="form-label">Level <span class="req">*</span></label>
+      <select name="level" class="form-control">
+        <option value="">— Select level —</option>
+        {% for val, label in level_choices %}
+        <option value="{{ val }}" {% if d.level == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      {% if errors.level %}<span class="form-error">{{ errors.level }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select name="category" class="form-control">
+        <option value="">— No category —</option>
+        {% for cat in categories %}
+        <option value="{{ cat.pk }}" {% if d.category_id == cat.pk or d.category.pk == cat.pk %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group full">
+      <label class="form-label">Description</label>
+      <textarea name="description" class="form-control" rows="3"
+                placeholder="Short description of the course content…">{{ d.description|default:'' }}</textarea>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── THUMBNAIL ── -->
+<div class="form-card">
+  <div class="form-section-title">Thumbnail card</div>
+  <div class="form-grid">
+
+    <div class="form-group {% if errors.short_label %}field-err{% endif %}">
+      <label class="form-label">Short label (big text) <span class="req">*</span></label>
+      <input type="text" name="short_label" id="id_short_label" class="form-control"
+             value="{{ d.short_label|default:'' }}"
+             maxlength="10" placeholder="e.g. PSC"
+             oninput="updatePreview()">
+      <span class="form-hint">Displayed large on the thumbnail card.</span>
+      {% if errors.short_label %}<span class="form-error">{{ errors.short_label }}</span>{% endif %}
+    </div>
+
+    <div class="form-group {% if errors.sub_label %}field-err{% endif %}">
+      <label class="form-label">Sub-label (small text) <span class="req">*</span></label>
+      <input type="text" name="sub_label" id="id_sub_label" class="form-control"
+             value="{{ d.sub_label|default:'' }}"
+             maxlength="40" placeholder="e.g. Mission SCERT"
+             oninput="updatePreview()">
+      <span class="form-hint">Displayed small below the big label.</span>
+      {% if errors.sub_label %}<span class="form-error">{{ errors.sub_label }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Thumbnail gradient</label>
+      <select name="thumb_style" id="id_thumb" class="form-control" onchange="updatePreview()">
+        {% for val, label in thumb_choices %}
+        <option value="{{ val }}" {% if d.thumb_style == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <div class="thumb-preview {% if d.thumb_style %}{{ d.thumb_style }}{% else %}thumb1{% endif %}" id="thumb-prev">
+        <div>
+          <div class="tp-big" id="prev-big">{{ d.short_label|default:"PSC" }}</div>
+          <div class="tp-sm" id="prev-sm">{{ d.sub_label|default:"Course" }}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── PRICING ── -->
+<div class="form-card">
+  <div class="form-section-title">Pricing</div>
+  <div class="form-grid-3">
+
+    <div class="form-group {% if errors.price %}field-err{% endif %}">
+      <label class="form-label">Selling Price (₹) <span class="req">*</span></label>
+      <input type="number" name="price" class="form-control"
+             value="{{ d.price|default:'' }}" min="0" step="1" placeholder="499">
+      {% if errors.price %}<span class="form-error">{{ errors.price }}</span>{% endif %}
+    </div>
+
+    <div class="form-group {% if errors.original_price %}field-err{% endif %}">
+      <label class="form-label">Original Price (₹)</label>
+      <input type="number" name="original_price" class="form-control"
+             value="{{ d.original_price|default:'' }}" min="0" step="1" placeholder="3000">
+      <span class="form-hint">Crossed-out price. Leave blank if no discount.</span>
+      {% if errors.original_price %}<span class="form-error">{{ errors.original_price }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Sort Order</label>
+      <input type="number" name="sort_order" class="form-control"
+             value="{{ d.sort_order|default:0 }}" min="0" step="1" placeholder="0">
+      <span class="form-hint">Lower = appears first in the homepage grid.</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── FLAGS & STATUS ── -->
+<div class="form-card">
+  <div class="form-section-title">Tags, visibility &amp; status</div>
+
+  <div class="form-grid">
+
+    <div class="form-group">
+      <label class="form-label">Card tags</label>
+      <div class="check-group">
+        <label class="check-item">
+          <input type="checkbox" name="tag_new" {% if d.tag_new %}checked{% endif %}>
+          <span style="color:var(--red)">● New</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="tag_live" {% if d.tag_live %}checked{% endif %}>
+          <span style="color:var(--bl)">● Live Class</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="tag_free" {% if d.tag_free %}checked{% endif %}>
+          <span style="color:var(--gold)">● Free Content</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Homepage visibility</label>
+      <div class="check-group">
+        <label class="check-item">
+          <input type="checkbox" name="is_featured" {% if d.is_featured %}checked{% endif %}>
+          ★ Show in Featured Courses grid on homepage
+        </label>
+      </div>
+      <span class="form-hint">Only active + featured courses appear in the homepage grid.</span>
+    </div>
+
+    <div class="form-group {% if errors.status %}field-err{% endif %}">
+      <label class="form-label">Status <span class="req">*</span></label>
+      <select name="status" class="form-control">
+        {% for val, label in status_choices %}
+        <option value="{{ val }}" {% if d.status == val %}selected{% elif not d and val == 'draft' %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <span class="form-hint">Only Active courses are shown to users.</span>
+      {% if errors.status %}<span class="form-error">{{ errors.status }}</span>{% endif %}
+    </div>
+
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn-save">{% if course %}Save Changes{% else %}Create Course{% endif %}</button>
+    <a href="{% url 'admin_courses' %}" class="btn-cancel">Cancel</a>
+  </div>
+</div>
+
+</form>
+{% endwith %}
+</div>
+
+<script>
+function slugify(s){
+  return s.toLowerCase().trim()
+    .replace(/[^\w\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,'');
+}
+function autoSlug(val){
+  const sf = document.getElementById('id_slug');
+  sf.value = slugify(val);
+}
+function updatePreview(){
+  const big   = document.getElementById('id_short_label').value || 'PSC';
+  const sm    = document.getElementById('id_sub_label').value   || 'Course';
+  const style = document.getElementById('id_thumb').value       || 'thumb1';
+  document.getElementById('prev-big').textContent = big;
+  document.getElementById('prev-sm').textContent  = sm;
+  const prev  = document.getElementById('thumb-prev');
+  prev.className = 'thumb-preview ' + style;
+}
+</script>
+{% endblock %}

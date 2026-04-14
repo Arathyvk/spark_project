@@ -1,0 +1,594 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark Learnings – Kerala PSC Coaching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Serif+Malayalam:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ── ROOT TOKENS ── */
+:root{
+  --bl:#1565C0; --bl2:#1976D2; --bl3:#1E88E5; --bl4:#42A5F5;
+  --bl5:#90CAF9; --bl6:#BBDEFB; --bl7:#E3F2FD; --bl8:#F0F8FF;
+  --bldk:#0D47A1; --bldkk:#042C53;
+  --wh:#fff; --gray:#F5F7FA; --gray2:#EEF1F6;
+  --gray3:#8A97B0; --gray4:#4A5568; --gray5:#1A2240;
+  --gold:#F59E0B; --goldlt:#FEF3C7;
+  --green:#10B981; --greenlt:#D1FAE5;
+  --red:#EF4444; --redlt:#FEE2E2;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var(--gray5);width:100%;overflow-x:hidden}
+
+/* ── TOPNAV ── */
+.topnav{
+  background:var(--bl);padding:14px clamp(16px,4vw,40px);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:999;
+  box-shadow:0 2px 12px rgba(13,71,161,.25);
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:38px;height:38px;background:white;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:13px;color:var(--bl);letter-spacing:-1px;flex-shrink:0;
+}
+.logo-text{color:white;font-size:clamp(15px,2.5vw,19px);font-weight:700}
+.logo-text b{color:var(--bl5)}
+.nav-right{display:flex;gap:8px;align-items:center}
+.nav-link{
+  color:rgba(255,255,255,.8);font-size:13px;font-weight:600;
+  text-decoration:none;padding:6px 12px;border-radius:7px;
+  transition:.15s;
+}
+.nav-link:hover{background:rgba(255,255,255,.12);color:white}
+.nav-btn{
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  color:white;border-radius:8px;padding:7px 16px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;
+}
+.nav-btn.solid{background:white;color:var(--bl);border-color:white}
+.nav-icon-btn{
+  width:38px;height:38px;border-radius:9px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
+  color:white;font-size:16px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;flex-shrink:0;
+}
+.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:#FFD166;border:1.5px solid var(--bl)}
+
+/* ── HERO BANNER ── */
+.banner-wrap{background:var(--bldk);padding:clamp(16px,3vw,28px) 0}
+.banner-inner{max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.banner-slide{
+  background:var(--bldkk);border-radius:clamp(16px,2vw,24px);
+  padding:clamp(20px,4vw,44px);position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;
+}
+.banner-slide::before{
+  content:'';position:absolute;width:320px;height:320px;border-radius:50%;
+  background:rgba(255,255,255,.03);top:-80px;right:220px;pointer-events:none;
+}
+.banner-eyebrow{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,209,102,.18);border:1px solid rgba(255,209,102,.35);
+  color:#FFD166;font-size:10px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:12px;
+}
+.banner-title{color:white;font-size:clamp(22px,4vw,42px);font-weight:800;line-height:1.15;margin-bottom:8px;letter-spacing:-.5px}
+.banner-title .accent{color:#FFD166}
+.banner-sub{color:rgba(255,255,255,.6);font-size:clamp(12px,1.5vw,14px);line-height:1.7;margin-bottom:clamp(16px,2vw,24px);font-family:'Noto Serif Malayalam',serif}
+.banner-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn-primary{
+  background:white;color:var(--bl);font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:700;font-size:clamp(12px,1.4vw,14px);
+  padding:clamp(10px,1.2vw,13px) clamp(16px,2vw,24px);border-radius:11px;border:none;cursor:pointer;
+  transition:.15s;text-decoration:none;display:inline-block;
+}
+.btn-primary:hover{background:var(--bl6);color:var(--bldk)}
+.btn-ghost{
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);
+  color:white;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;
+  font-size:clamp(12px,1.4vw,14px);padding:clamp(10px,1.2vw,13px) clamp(14px,1.8vw,20px);
+  border-radius:11px;cursor:pointer;transition:.15s;text-decoration:none;display:inline-block;
+}
+.btn-ghost:hover{background:rgba(255,255,255,.2)}
+.banner-tags{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.btag{font-size:10px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.15)}
+.banner-badge{background:var(--red);border-radius:12px;padding:clamp(10px,1.5vw,16px) clamp(12px,1.8vw,20px);text-align:center;min-width:90px;flex-shrink:0}
+.badge-was{font-size:11px;color:rgba(255,255,255,.7);text-decoration:line-through}
+.badge-now{font-size:clamp(20px,2.8vw,30px);font-weight:800;color:white;line-height:1.1}
+.badge-off{font-size:10px;color:#ffcdd2;font-weight:700}
+.banner-dots{display:flex;gap:5px;justify-content:center;margin-top:14px}
+.bdot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25)}
+.bdot.on{width:20px;border-radius:3px;background:white}
+@media(max-width:600px){.banner-slide{grid-template-columns:1fr}.banner-badge{display:none}}
+
+/* ── CONTAINERS & SECTIONS ── */
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.section{padding:clamp(24px,4vw,40px) 0 0}
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:clamp(14px,2vw,22px)}
+.sec-title{font-size:clamp(17px,2.2vw,22px);font-weight:700;color:var(--bldk);letter-spacing:-.3px}
+.sec-link{font-size:clamp(12px,1.4vw,14px);font-weight:600;color:var(--bl2);text-decoration:none;display:flex;align-items:center;gap:4px}
+.sec-link:hover{color:var(--bldk)}
+
+/* ── CATEGORY GRID ── */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:clamp(10px,1.5vw,16px)}
+.cat-card{
+  background:white;border:1px solid var(--bl6);border-radius:clamp(12px,1.5vw,16px);
+  padding:clamp(14px,2vw,20px) clamp(12px,1.8vw,18px);cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+}
+.cat-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(21,101,192,.14)}
+.cat-icon-wrap{width:clamp(36px,4vw,44px);height:clamp(36px,4vw,44px);border-radius:10px;background:var(--bl7);display:flex;align-items:center;justify-content:center;font-size:clamp(16px,2.2vw,22px);margin-bottom:10px}
+.cat-name{font-size:clamp(12px,1.4vw,14px);font-weight:700;color:var(--bldk);line-height:1.25}
+.cat-count{font-size:clamp(10px,1.1vw,12px);font-weight:500;color:var(--bl2);margin-top:3px}
+
+/* ── COURSES GRID ── */
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:clamp(12px,2vw,20px)}
+.course-card{
+  background:white;border-radius:clamp(14px,2vw,20px);overflow:hidden;
+  border:1px solid var(--bl6);box-shadow:0 2px 12px rgba(21,101,192,.07);
+  cursor:pointer;transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;
+}
+.course-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(21,101,192,.16)}
+.course-thumb{height:clamp(110px,15vw,150px);position:relative;display:flex;align-items:flex-end;padding:12px}
+.thumb1{background:linear-gradient(145deg,#0D47A1,#1565C0)}
+.thumb2{background:linear-gradient(145deg,#1a237e,#283593)}
+.thumb3{background:linear-gradient(145deg,#004D40,#00695C)}
+.thumb4{background:linear-gradient(145deg,#880E4F,#AD1457)}
+.thumb-glow{position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)}
+.thumb-label .big{display:block;font-size:clamp(20px,2.8vw,28px);font-weight:800;color:#FFD166;letter-spacing:-1px;line-height:1}
+.thumb-label .small{font-size:11px;font-weight:600;color:rgba(255,255,255,.8)}
+.course-tags{display:flex;gap:5px;padding:10px 12px 5px;flex-wrap:wrap}
+.tag{font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:3px 7px;border-radius:5px}
+.t-new{background:var(--redlt);color:var(--red)}
+.t-live{background:var(--bl7);color:var(--bl);border:1px solid var(--bl6)}
+.t-free{background:var(--goldlt);color:var(--gold)}
+.course-body{padding:4px 12px 14px;flex:1;display:flex;flex-direction:column}
+.course-name{font-size:clamp(13px,1.5vw,15px);font-weight:700;color:var(--gray5);margin-bottom:8px;line-height:1.3;flex:1}
+.price-row{display:flex;align-items:baseline;gap:7px;margin-bottom:10px}
+.p-now{font-size:clamp(14px,1.8vw,18px);font-weight:800;color:var(--gray5)}
+.p-was{font-size:11px;color:var(--gray3);text-decoration:line-through}
+.p-off{font-size:10px;font-weight:700;color:var(--green)}
+.btn-enroll{
+  width:100%;padding:clamp(9px,1.2vw,12px);background:var(--bl);color:white;
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:clamp(12px,1.3vw,13px);
+  border:none;border-radius:10px;cursor:pointer;transition:.15s;text-align:center;text-decoration:none;display:block;
+}
+.btn-enroll:hover{background:var(--bldk)}
+
+/* ── FREE CONTENT CARDS ── */
+.free-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:clamp(10px,1.5vw,16px)}
+.free-card{
+  border-radius:clamp(12px,1.5vw,18px);padding:clamp(18px,2.5vw,28px) clamp(16px,2.5vw,24px);
+  cursor:pointer;position:relative;overflow:hidden;transition:transform .15s;
+}
+.free-card:hover{transform:translateY(-3px)}
+.fc-videos{background:var(--bl)}
+.fc-study{background:var(--bldk)}
+.fc-icon{width:clamp(36px,4vw,48px);height:clamp(36px,4vw,48px);background:rgba(255,255,255,.15);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,2.2vw,24px);margin-bottom:12px}
+.fc-title{color:white;font-size:clamp(14px,1.8vw,18px);font-weight:700;line-height:1.3;margin-bottom:4px}
+.fc-sub{color:rgba(255,255,255,.6);font-size:clamp(11px,1.2vw,13px);margin-bottom:14px}
+.fc-arrow{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:8px;color:white;font-size:15px}
+.fc-bg{position:absolute;bottom:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.06)}
+
+/* ── LATEST CLASSES ── */
+.latest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:clamp(10px,1.5vw,16px)}
+.class-card{
+  background:white;border-radius:clamp(12px,1.5vw,16px);border:1px solid var(--bl6);
+  padding:clamp(12px,1.8vw,18px);display:flex;gap:clamp(10px,1.5vw,14px);align-items:flex-start;
+  cursor:pointer;box-shadow:0 2px 8px rgba(21,101,192,.07);transition:transform .15s,box-shadow .15s;
+}
+.class-card:hover{transform:translateY(-3px);box-shadow:0 6px 24px rgba(21,101,192,.13)}
+.class-thumb-wrap{width:clamp(68px,10vw,88px);height:clamp(60px,8vw,74px);border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.class-thumb-text{font-size:12px;font-weight:800;color:#FFD166;text-align:center;line-height:1.2;z-index:1}
+.play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2)}
+.play-btn{width:28px;height:28px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.play-tri{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:10px solid var(--bl);margin-left:2px}
+.class-info{flex:1;min-width:0}
+.class-subject{font-size:10px;font-weight:700;color:var(--bl2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.class-title{font-size:clamp(12px,1.4vw,14px);font-weight:700;color:var(--gray5);line-height:1.3;margin-bottom:7px}
+.class-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.class-date{font-size:11px;color:var(--gray3);font-weight:500}
+.class-dur{font-size:10px;font-weight:600;background:var(--bl7);color:var(--bl);padding:2px 7px;border-radius:5px;border:1px solid var(--bl6)}
+.class-live{font-size:10px;font-weight:700;background:var(--redlt);color:var(--red);padding:2px 7px;border-radius:5px}
+
+/* ── REVIEWS ── */
+.rev-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.5vw,14px);margin-bottom:clamp(16px,2vw,24px)}
+.stat-box{background:white;border:1px solid var(--bl6);border-radius:clamp(10px,1.5vw,16px);padding:clamp(12px,1.8vw,18px) 10px;text-align:center}
+.stat-num{font-size:clamp(20px,2.5vw,28px);font-weight:800;color:var(--bl)}
+.stat-label{font-size:clamp(10px,1.2vw,12px);color:var(--gray3);font-weight:500;margin-top:2px}
+.stat-stars{display:flex;justify-content:center;gap:2px;font-size:13px;color:var(--gold);margin-top:2px}
+.reviews-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:clamp(10px,1.5vw,16px)}
+.rev-card{background:white;border-radius:clamp(12px,1.5vw,18px);border:1px solid var(--bl6);padding:clamp(14px,2vw,20px);box-shadow:0 2px 8px rgba(21,101,192,.06)}
+.rev-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.author-row{display:flex;align-items:center;gap:10px}
+.ava{width:clamp(36px,4vw,42px);height:clamp(36px,4vw,42px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(13px,1.6vw,16px);font-weight:700;color:white;flex-shrink:0}
+.ava-bl{background:var(--bl2)}.ava-gr{background:var(--green)}.ava-pr{background:#7C3AED}
+.author-name{font-size:clamp(13px,1.4vw,14px);font-weight:700;color:var(--bldk)}
+.author-badge{font-size:11px;color:var(--gray3);margin-top:1px}
+.stars-row{display:flex;gap:2px;font-size:13px;color:var(--gold)}
+.verified{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--green);background:var(--greenlt);padding:2px 7px;border-radius:5px;margin-top:4px}
+.rev-text{font-size:clamp(12px,1.3vw,13px);color:#3A4A6A;line-height:1.65;font-style:italic;margin-bottom:12px}
+.rev-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--gray2);padding-top:10px;flex-wrap:wrap;gap:6px}
+.rev-date{font-size:11px;color:var(--gray3)}
+.rev-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--bl7);color:var(--bl)}
+.helpful-btn{font-size:11px;font-weight:600;color:var(--bl);background:var(--bl7);border:none;padding:4px 10px;border-radius:8px;cursor:pointer}
+
+/* ── CONNECT ── */
+.connect-sec{background:var(--bldk);padding:clamp(24px,4vw,48px) 0;margin-top:clamp(20px,3vw,36px)}
+.connect-inner{max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.connect-title{color:white;font-size:clamp(16px,2.2vw,22px);font-weight:700;margin-bottom:4px}
+.connect-sub{color:rgba(255,255,255,.55);font-size:clamp(12px,1.4vw,14px);margin-bottom:clamp(16px,2.5vw,28px)}
+.social-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:clamp(10px,1.5vw,16px)}
+.soc-btn{border-radius:clamp(12px,1.5vw,16px);padding:clamp(14px,2vw,22px) 10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;border:none;transition:transform .15s;text-decoration:none}
+.soc-btn:hover{transform:scale(1.04)}
+.soc-icon{font-size:clamp(20px,3vw,28px)}
+.soc-label{color:white;font-size:clamp(11px,1.3vw,13px);font-weight:600;font-family:'Plus Jakarta Sans',sans-serif}
+.sb-yt{background:#FF0000}.sb-ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)}.sb-fb{background:#1877F2}.sb-tg{background:#229ED9}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  background:white;border-top:1px solid var(--bl6);
+  display:grid;grid-template-columns:repeat(4,1fr);
+  padding:8px 0 clamp(16px,3vw,20px);
+  position:sticky;bottom:0;z-index:999;
+  box-shadow:0 -4px 20px rgba(21,101,192,.07);
+}
+.bni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;text-decoration:none}
+.bni-icon{width:40px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.bni.active .bni-icon{background:var(--bl7)}
+.bni-label{font-size:clamp(9px,1.2vw,11px);font-weight:600;color:var(--gray3)}
+.bni.active .bni-label{color:var(--bl)}
+
+.spacer{height:clamp(16px,2.5vw,28px)}
+
+/* ── MESSAGES ── */
+.messages-wrap{padding:10px clamp(16px,4vw,40px);max-width:1200px;margin:0 auto}
+.alert{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:8px}
+.alert-success{background:var(--greenlt);color:#065F46}
+.alert-error{background:var(--redlt);color:#991B1B}
+.alert-info{background:var(--bl7);color:var(--bldk)}
+</style>
+</head>
+<body>
+
+<!-- TOPNAV -->
+<nav class="topnav">
+  <div class="logo">
+    <div class="logo-icon">SL</div>
+    <div class="logo-text">Spark <b>Learnings</b></div>
+  </div>
+  <div class="nav-right">
+    <a href="#" class="nav-link">Courses</a>
+    {% if user.is_authenticated %}
+      <span class="nav-link">{{ user.full_name|truncatechars:15 }}</span>
+    {% else %}
+      <a href="#" class="nav-btn">Login</a>
+      <a href="#" class="nav-btn solid">Register</a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- MESSAGES -->
+{% if messages %}
+<div class="messages-wrap">
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ══ 1. HERO BANNER ══ -->
+<div class="banner-wrap">
+  <div class="banner-inner">
+    {% for banner in banners %}
+    <div class="banner-slide" {% if not forloop.first %}style="display:none"{% endif %}>
+      <div class="banner-content">
+        <div class="banner-eyebrow">&#10022; Featured Course</div>
+        <div class="banner-title">
+          {% if banner.accent_word %}
+            {{ banner.title|cut:banner.accent_word }} <span class="accent">{{ banner.accent_word }}</span>
+          {% else %}
+            {{ banner.title }}
+          {% endif %}
+        </div>
+        {% if banner.subtitle_ml %}
+        <div class="banner-sub">{{ banner.subtitle_ml }}</div>
+        {% endif %}
+        <div class="banner-actions">
+          {% if banner.course %}
+            <a href="{% url 'course_detail' banner.course.slug %}" class="btn-primary">{{ banner.cta_primary }}</a>
+            <a href="{% url 'course_detail' banner.course.slug %}" class="btn-ghost">{{ banner.cta_secondary }}</a>
+          {% else %}
+            <button class="btn-primary">{{ banner.cta_primary }}</button>
+            <button class="btn-ghost">{{ banner.cta_secondary }}</button>
+          {% endif %}
+        </div>
+        {% if banner.tag_list %}
+        <div class="banner-tags">
+          {% for t in banner.tag_list %}<span class="btag">{{ t }}</span>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% if banner.badge_price %}
+      <div class="banner-badge">
+        {% if banner.badge_original %}<div class="badge-was">&#8377;{{ banner.badge_original|floatformat:0 }}</div>{% endif %}
+        <div class="badge-now">&#8377;{{ banner.badge_price|floatformat:0 }}</div>
+        {% if banner.badge_discount %}<div class="badge-off">{{ banner.badge_discount }}% OFF</div>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% empty %}
+    <div class="banner-slide">
+      <div class="banner-content">
+        <div class="banner-eyebrow">&#10022; Welcome</div>
+        <div class="banner-title">Kerala's No.1 <span class="accent">PSC</span> Platform</div>
+        <div class="banner-sub">Live classes · Free content · Mock tests</div>
+        <div class="banner-actions">
+          <a href="{% url 'courses' %}" class="btn-primary">Browse Courses</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% if banners.count > 1 %}
+    <div class="banner-dots">
+      {% for b in banners %}<div class="bdot {% if forloop.first %}on{% endif %}"></div>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ══ 2. CATEGORIES ══ -->
+<div class="section">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-title">What are you looking for?</div>
+    </div>
+    <div class="cat-grid">
+      {% for cat in categories %}
+      <a href="{% url 'courses' %}?category={{ cat.slug }}" style="text-decoration:none">
+        <div class="cat-card">
+          <div class="cat-icon-wrap">{{ cat.icon }}</div>
+          <div class="cat-name">{{ cat.name }}</div>
+          <div class="cat-count">{{ cat.course_count }} courses</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ══ 3. FEATURED COURSES ══ -->
+<div class="section">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-title">Featured Courses</div>
+      <a href="{% url 'courses' %}" class="sec-link">See All &#8594;</a>
+    </div>
+    <div class="courses-grid">
+      {% for course in featured_courses %}
+      <div class="course-card">
+        <div class="course-thumb {{ course.thumb_style }}">
+          <div class="thumb-glow"></div>
+          <div class="thumb-label">
+            <span class="big">{{ course.short_label }}</span>
+            <span class="small">{{ course.sub_label }}</span>
+          </div>
+        </div>
+        <div class="course-tags">
+          {% if course.tag_new %}<span class="tag t-new">New</span>{% endif %}
+          {% if course.tag_live %}<span class="tag t-live">Live Class</span>{% endif %}
+          {% if course.tag_free %}<span class="tag t-free">Free Content</span>{% endif %}
+        </div>
+        <div class="course-body">
+          <div class="course-name">{{ course.name }}</div>
+          <div class="price-row">
+            <span class="p-now">&#8377;{{ course.price|floatformat:0 }}</span>
+            {% if course.original_price %}
+            <span class="p-was">&#8377;{{ course.original_price|floatformat:0 }}</span>
+            {% endif %}
+            {% if course.discount_percent %}
+            <span class="p-off">{{ course.discount_percent }}% off</span>
+            {% endif %}
+          </div>
+          <a href="{% url 'course_detail' course.slug %}" class="btn-enroll">Get This Course</a>
+        </div>
+      </div>
+      {% empty %}
+      <p style="color:var(--gray3);font-size:13px">No featured courses yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ══ 4. FREE CONTENT ══ -->
+<div class="section">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-title">Free Content</div>
+      <a href="#" class="sec-link">See All &#8594;</a>
+    </div>
+    <div class="free-grid">
+      <div class="free-card fc-videos">
+        <div class="fc-icon">&#9654;</div>
+        <div class="fc-title">Recorded Videos</div>
+        <div class="fc-sub">{{ free_videos }}+ free videos available</div>
+        <div class="fc-arrow">&#8594;</div>
+        <div class="fc-bg"></div>
+      </div>
+      <div class="free-card fc-study">
+        <div class="fc-icon">&#128196;</div>
+        <div class="fc-title">Study Material</div>
+        <div class="fc-sub">{{ free_pdfs }}+ PDF notes &amp; guides</div>
+        <div class="fc-arrow">&#8594;</div>
+        <div class="fc-bg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 5. LATEST CLASSES ══ -->
+<div class="section">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-title">Latest Classes</div>
+      <a href="#" class="sec-link">See All &#8594;</a>
+    </div>
+    <div class="latest-grid">
+{% for cls in latest_classes %}
+<div class="class-card">
+  <div class="class-thumb-wrap {{ cls.thumb_style }}">
+    <div class="class-thumb-text">{{ cls.thumb_label }}</div>
+    <div class="play-overlay">
+      <div class="play-btn"><div class="play-tri"></div></div>
+    </div>
+  </div>
+
+  <div class="class-info">
+    <div class="class-subject">{{ cls.subject }}</div>
+    <div class="class-title">{{ cls.title }}</div>
+
+    <div class="class-meta">
+      {% if cls.is_live_now %}
+        <span class="class-live">&#9679; Live Now</span>
+      {% else %}
+        <span class="class-date">{{ cls.scheduled_at|date:"M j, Y" }}</span>
+
+        {% if cls.duration_min %}
+          <span class="class-dur">
+            {% if cls.hours %}
+              {{ cls.hours }}h{% if cls.minutes %} {% endif %}
+            {% endif %}
+            {% if cls.minutes %}
+              {{ cls.minutes }}m
+            {% endif %}
+          </span>
+        {% else %}
+          <span class="class-dur">0m</span>
+        {% endif %}
+
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ══ 6. REVIEWS ══ -->
+<div class="section">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-title">Student Reviews</div>
+      {% if user.is_authenticated %}
+      <a href="#" class="sec-link">+ Add Review</a>
+      {% endif %}
+    </div>
+    <div class="rev-stats">
+      <div class="stat-box">
+        <div class="stat-num">{{ avg_rating }}</div>
+        <div class="stat-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div class="stat-label">Overall Rating</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">
+          {% if total_reviews >= 1000 %}{{ total_reviews|divisibleby:100 }}.{{ total_reviews|stringformat:"d" }}k
+          {% else %}{{ total_reviews }}{% endif %}
+        </div>
+        <div class="stat-label">Total Reviews</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">{{ recommend_pct }}%</div>
+        <div class="stat-label">Recommend</div>
+      </div>
+    </div>
+    <div class="reviews-grid">
+      {% for rev in reviews %}
+      <div class="rev-card">
+        <div class="rev-card-top">
+          <div class="author-row">
+            <div class="ava ava-bl">{{ rev.user.full_name|first }}</div>
+            <div>
+              <div class="author-name">{{ rev.user.full_name }}</div>
+              <div class="author-badge">{% if rev.user.district %}{{ rev.user.district }}{% endif %}</div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div class="stars-row">
+              {% for i in "12345" %}
+                {% if forloop.counter <= rev.rating %}&#9733;{% else %}<span style="color:var(--gray2)">&#9733;</span>{% endif %}
+              {% endfor %}
+            </div>
+            <div class="verified">&#10003; Verified</div>
+          </div>
+        </div>
+        <div class="rev-text">"{{ rev.comment|truncatewords:30 }}"</div>
+        <div class="rev-footer">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <span class="rev-badge">{{ rev.course.short_label }}</span>
+            <span class="rev-date">{{ rev.created_at|date:"M j, Y" }}</span>
+          </div>
+          <button class="helpful-btn">Helpful {{ rev.helpful_count }}</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ══ 7. CONNECT ══ -->
+<div class="connect-sec">
+  <div class="connect-inner">
+    <div class="connect-title">Connect With Us</div>
+    <div class="connect-sub">Follow us for daily updates, free classes &amp; tips</div>
+    <div class="social-grid">
+      <a href="#" class="soc-btn sb-yt"><span class="soc-icon">&#9654;</span><span class="soc-label">YouTube</span></a>
+      <a href="#" class="soc-btn sb-ig"><span class="soc-icon">&#9711;</span><span class="soc-label">Instagram</span></a>
+      <a href="#" class="soc-btn sb-fb"><span class="soc-icon" style="font-weight:800;font-size:22px">f</span><span class="soc-label">Facebook</span></a>
+      <a href="#" class="soc-btn sb-tg"><span class="soc-icon">&#10148;</span><span class="soc-label">Telegram</span></a>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="{% url 'landing' %}" class="bni active">
+    <div class="bni-icon">&#127968;</div><span class="bni-label">Home</span>
+  </a>
+  <a href="{% url 'courses' %}" class="bni">
+    <div class="bni-icon">&#128218;</div><span class="bni-label">Courses</span>
+  </a>
+  <a href="#" class="bni">
+    <div class="bni-icon">&#128172;</div><span class="bni-label">Contact</span>
+  </a>
+  <a href="#" class="bni">
+    <div class="bni-icon">&#128221;</div><span class="bni-label">Tests</span>
+  </a>
+</nav>
+
+<script>
+// Simple banner auto-slide
+(function(){
+  const slides = document.querySelectorAll('.banner-slide');
+  const dots   = document.querySelectorAll('.bdot');
+  if(slides.length <= 1) return;
+  let cur = 0;
+  setInterval(()=>{
+    slides[cur].style.display = 'none';
+    dots[cur].classList.remove('on');
+    cur = (cur+1) % slides.length;
+    slides[cur].style.display = 'grid';
+    dots[cur].classList.add('on');
+  }, 4000);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+{% extends "admin_base.html" %}
+{% block title %}Classes{% endblock %}
+{% block nav_classes %}active{% endblock %}
+{% block page_title %}Classes Manager{% endblock %}
+{% block page_sub %}Live and recorded classes — Live Now badge auto-shows within ±15 min of schedule{% endblock %}
+  <a href="{% url 'admin_class_add' %}" class="tb-btn">+ Add Class</a>
+
+{% block content %}
+<div class="filter-bar">
+  <a href="{% url 'admin_classes' %}" class="filter-pill {% if not type_filter and not pub_filter %}active{% endif %}">All</a>
+  {% for val, label in type_choices %}
+  <a href="{% url 'admin_classes' %}?type={{ val }}" class="filter-pill {% if type_filter == val %}active{% endif %}">{{ label }}</a>
+  {% endfor %}
+  <a href="{% url 'admin_classes' %}?published=1" class="filter-pill {% if pub_filter == '1' %}active{% endif %}">Published</a>
+  <a href="{% url 'admin_classes' %}?published=0" class="filter-pill {% if pub_filter == '0' %}active{% endif %}">Drafts</a>
+</div>
+
+<div class="card">
+  <div class="card-hd">
+    <span class="card-title">{{ classes|length }} class{{ classes|length|pluralize:"es" }}</span>
+    <a href="{% url 'admin_class_add' %}" class="card-action">+ Add Class</a>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>sl no</th>
+          <th>Title / Subject</th>
+          <th>Course</th>
+          <th>Type</th>
+          <th>Scheduled</th>
+          <th>Duration</th>
+          <th>Live Now?</th>
+          <th>Published</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cls in classes %}
+        <tr>
+          <td style="color:var(--gray3)">{{ cls.pk }}</td>
+          <td>
+            <div style="font-weight:700;color:var(--gray5)">{{ cls.title|truncatechars:36 }}</div>
+            <div style="font-size:10px;color:var(--gray3);margin-top:1px">{{ cls.subject }}</div>
+          </td>
+          <td style="font-size:11px">{% if cls.course %}{{ cls.course.short_label }}{% else %}<span style="color:var(--gray3)">—</span>{% endif %}</td>
+          <td>
+            <span class="pill {% if cls.class_type == 'live' %}pill-live{% else %}pill-active{% endif %}">
+              {{ cls.get_class_type_display }}
+            </span>
+          </td>
+          <td style="font-size:11px;white-space:nowrap">{{ cls.scheduled_at|date:"M j, Y · g:i A" }}</td>
+          <td style="font-size:11px">{% if cls.duration_display %}{{ cls.duration_display }}{% else %}<span style="color:var(--gray3)">—</span>{% endif %}</td>
+          <td>
+            {% if cls.is_live_now %}
+            <span class="pill pill-live" style="display:flex;align-items:center;gap:4px">
+              <span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block"></span>
+              Live Now
+            </span>
+            {% else %}
+            <span style="color:var(--gray3);font-size:11px">—</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="pill {% if cls.is_published %}pill-active{% else %}pill-draft{% endif %}">
+              {% if cls.is_published %}Yes{% else %}Draft{% endif %}
+            </span>
+          </td>
+          <td>
+            <div class="acts">
+              <a href="{% url 'admin_class_edit' cls.pk %}" class="act act-bl">Edit</a>
+              <form method="POST" action="{% url 'admin_class_delete' cls.pk %}" style="display:inline" onsubmit="return confirm('Delete this class?')">
+                {% csrf_token %}
+                <button type="submit" class="act act-rd">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" style="text-align:center;padding:32px;color:var(--gray3)">
+            No classes yet. <a href="{% url 'admin_class_add' %}" style="color:var(--bl)">Add one →</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
