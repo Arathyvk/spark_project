@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Serif+Malayalam:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* ── ROOT TOKENS ── */
 :root{
   --bl:#1565C0; --bl2:#1976D2; --bl3:#1E88E5; --bl4:#42A5F5;
   --bl5:#90CAF9; --bl6:#BBDEFB; --bl7:#E3F2FD; --bl8:#F0F8FF;
@@ -23,7 +22,6 @@
 html{font-size:16px;scroll-behavior:smooth}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var(--gray5);width:100%;overflow-x:hidden}
 
-/* ── TOPNAV ── */
 .topnav{
   background:var(--bl);padding:14px clamp(16px,4vw,40px);
   display:flex;align-items:center;justify-content:space-between;
@@ -59,7 +57,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 }
 .notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:#FFD166;border:1.5px solid var(--bl)}
 
-/* ── HERO BANNER ── */
 .banner-wrap{background:var(--bldk);padding:clamp(16px,3vw,28px) 0}
 .banner-inner{max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
 .banner-slide{
@@ -107,7 +104,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 .bdot.on{width:20px;border-radius:3px;background:white}
 @media(max-width:600px){.banner-slide{grid-template-columns:1fr}.banner-badge{display:none}}
 
-/* ── CONTAINERS & SECTIONS ── */
 .container{width:100%;max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
 .section{padding:clamp(24px,4vw,40px) 0 0}
 .sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:clamp(14px,2vw,22px)}
@@ -115,7 +111,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 .sec-link{font-size:clamp(12px,1.4vw,14px);font-weight:600;color:var(--bl2);text-decoration:none;display:flex;align-items:center;gap:4px}
 .sec-link:hover{color:var(--bldk)}
 
-/* ── CATEGORY GRID ── */
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:clamp(10px,1.5vw,16px)}
 .cat-card{
   background:white;border:1px solid var(--bl6);border-radius:clamp(12px,1.5vw,16px);
@@ -127,7 +122,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 .cat-name{font-size:clamp(12px,1.4vw,14px);font-weight:700;color:var(--bldk);line-height:1.25}
 .cat-count{font-size:clamp(10px,1.1vw,12px);font-weight:500;color:var(--bl2);margin-top:3px}
 
-/* ── COURSES GRID ── */
 .courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:clamp(12px,2vw,20px)}
 .course-card{
   background:white;border-radius:clamp(14px,2vw,20px);overflow:hidden;
@@ -161,7 +155,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 }
 .btn-enroll:hover{background:var(--bldk)}
 
-/* ── FREE CONTENT CARDS ── */
 .free-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:clamp(10px,1.5vw,16px)}
 .free-card{
   border-radius:clamp(12px,1.5vw,18px);padding:clamp(18px,2.5vw,28px) clamp(16px,2.5vw,24px);
@@ -176,7 +169,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 .fc-arrow{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:8px;color:white;font-size:15px}
 .fc-bg{position:absolute;bottom:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.06)}
 
-/* ── LATEST CLASSES ── */
 .latest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:clamp(10px,1.5vw,16px)}
 .class-card{
   background:white;border-radius:clamp(12px,1.5vw,16px);border:1px solid var(--bl6);
@@ -197,7 +189,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 .class-dur{font-size:10px;font-weight:600;background:var(--bl7);color:var(--bl);padding:2px 7px;border-radius:5px;border:1px solid var(--bl6)}
 .class-live{font-size:10px;font-weight:700;background:var(--redlt);color:var(--red);padding:2px 7px;border-radius:5px}
 
-/* ── REVIEWS ── */
 .rev-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.5vw,14px);margin-bottom:clamp(16px,2vw,24px)}
 .stat-box{background:white;border:1px solid var(--bl6);border-radius:clamp(10px,1.5vw,16px);padding:clamp(12px,1.8vw,18px) 10px;text-align:center}
 .stat-num{font-size:clamp(20px,2.5vw,28px);font-weight:800;color:var(--bl)}
@@ -219,7 +210,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 .rev-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--bl7);color:var(--bl)}
 .helpful-btn{font-size:11px;font-weight:600;color:var(--bl);background:var(--bl7);border:none;padding:4px 10px;border-radius:8px;cursor:pointer}
 
-/* ── CONNECT ── */
 .connect-sec{background:var(--bldk);padding:clamp(24px,4vw,48px) 0;margin-top:clamp(20px,3vw,36px)}
 .connect-inner{max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
 .connect-title{color:white;font-size:clamp(16px,2.2vw,22px);font-weight:700;margin-bottom:4px}
@@ -231,7 +221,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 .soc-label{color:white;font-size:clamp(11px,1.3vw,13px);font-weight:600;font-family:'Plus Jakarta Sans',sans-serif}
 .sb-yt{background:#FF0000}.sb-ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)}.sb-fb{background:#1877F2}.sb-tg{background:#229ED9}
 
-/* ── BOTTOM NAV ── */
 .bottom-nav{
   background:white;border-top:1px solid var(--bl6);
   display:grid;grid-template-columns:repeat(4,1fr);
@@ -247,7 +236,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 
 .spacer{height:clamp(16px,2.5vw,28px)}
 
-/* ── MESSAGES ── */
 .messages-wrap{padding:10px clamp(16px,4vw,40px);max-width:1200px;margin:0 auto}
 .alert{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:8px}
 .alert-success{background:var(--greenlt);color:#065F46}
@@ -257,7 +245,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 </head>
 <body>
 
-<!-- TOPNAV -->
 <nav class="topnav">
   <div class="logo">
     <div class="logo-icon">SL</div>
@@ -274,7 +261,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
   </div>
 </nav>
 
-<!-- MESSAGES -->
 {% if messages %}
 <div class="messages-wrap">
   {% for msg in messages %}
@@ -283,7 +269,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 </div>
 {% endif %}
 
-<!-- ══ 1. HERO BANNER ══ -->
 <div class="banner-wrap">
   <div class="banner-inner">
     {% for banner in banners %}
@@ -343,7 +328,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
   </div>
 </div>
 
-<!-- ══ 2. CATEGORIES ══ -->
 <div class="section">
   <div class="container">
     <div class="sec-head">
@@ -363,7 +347,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
   </div>
 </div>
 
-<!-- ══ 3. FEATURED COURSES ══ -->
 <div class="section">
   <div class="container">
     <div class="sec-head">
@@ -406,7 +389,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
   </div>
 </div>
 
-<!-- ══ 4. FREE CONTENT ══ -->
 <div class="section">
   <div class="container">
     <div class="sec-head">
@@ -432,7 +414,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
   </div>
 </div>
 
-<!-- ══ 5. LATEST CLASSES ══ -->
 <div class="section">
   <div class="container">
     <div class="sec-head">
@@ -481,7 +462,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
   </div>
 </div>
 
-<!-- ══ 6. REVIEWS ══ -->
 <div class="section">
   <div class="container">
     <div class="sec-head">
@@ -544,7 +524,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 
 <div class="spacer"></div>
 
-<!-- ══ 7. CONNECT ══ -->
 <div class="connect-sec">
   <div class="connect-inner">
     <div class="connect-title">Connect With Us</div>
@@ -558,7 +537,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <a href="{% url 'landing' %}" class="bni active">
     <div class="bni-icon">&#127968;</div><span class="bni-label">Home</span>
@@ -575,7 +553,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray);color:var
 </nav>
 
 <script>
-// Simple banner auto-slide
 (function(){
   const slides = document.querySelectorAll('.banner-slide');
   const dots   = document.querySelectorAll('.bdot');

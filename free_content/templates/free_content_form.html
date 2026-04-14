@@ -1,0 +1,160 @@
+{% extends "admin_base.html" %}
+{% block title %}{% if item %}Edit{% else %}Add{% endif %} Free Content{% endblock %}
+{% block nav_free %}active{% endblock %}
+{% block page_title %}{% if item %}Edit Free Content{% else %}Add Free Content{% endif %}{% endblock %}
+{% block page_sub %}{% if item %}Update "{{ item.title }}"{% else %}Add a video link or PDF URL{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+      <a href="{% url 'admin_free_content' %}" class="tb-btn outline">← Back</a>
+
+
+{% with d=post|default:item %}
+
+<div class="breadcrumb">
+  <a href="{% url 'admin_dashboard' %}">Dashboard</a><span>›</span>
+  <a href="{% url 'admin_free_content' %}">Free Content</a><span>›</span>
+  <span>{% if item %}Edit{% else %}Add{% endif %}</span>
+</div>
+
+<div class="alert alert-info" style="margin-bottom:16px">
+  <span>ℹ</span>
+  <span>
+    Leave <strong>Course</strong> blank for standalone free content (e.g. general GK videos shown on the homepage free section).
+    Linking to a course makes the item appear on that course's detail page too.
+  </span>
+</div>
+
+<form method="POST"
+      action="{% if item %}{% url 'admin_free_content_edit' item.pk %}{% else %}{% url 'admin_free_content_add' %}{% endif %}">
+{% csrf_token %}
+
+<div class="form-card">
+  <div class="form-section-title">Content details</div>
+  <div class="form-grid">
+
+    <div class="form-group full {% if errors.title %}field-err{% endif %}">
+      <label class="form-label">Title <span class="req">*</span></label>
+      <input type="text" name="title" class="form-control"
+             value="{{ d.title|default:'' }}"
+             placeholder="e.g. Kerala History – Ancient Period (Free Class)">
+      {% if errors.title %}<span class="form-error">{{ errors.title }}</span>{% endif %}
+    </div>
+
+    <div class="form-group full">
+      <label class="form-label">Description</label>
+      <textarea name="description" class="form-control" rows="2"
+                placeholder="Short description shown on listing cards…">{{ d.description|default:'' }}</textarea>
+    </div>
+
+    <div class="form-group {% if errors.content_type %}field-err{% endif %}">
+      <label class="form-label">Content Type <span class="req">*</span></label>
+      <select name="content_type" id="id_content_type" class="form-control" onchange="toggleDurationField()">
+        <option value="">— Select type —</option>
+        <option value="video" {% if d.content_type == 'video' %}selected{% endif %}>▶ Video (YouTube / embed)</option>
+        <option value="pdf"   {% if d.content_type == 'pdf'   %}selected{% endif %}>📄 PDF (file URL / Google Drive)</option>
+      </select>
+      {% if errors.content_type %}<span class="form-error">{{ errors.content_type }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Linked Course</label>
+      <select name="course" class="form-control">
+        <option value="">— Standalone (no course) —</option>
+        {% for c in courses %}
+        <option value="{{ c.pk }}"
+          {% if d.course_id == c.pk %}selected
+          {% elif d.course and d.course.pk == c.pk %}selected{% endif %}>
+          {{ c.short_label }} – {{ c.name|truncatechars:40 }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group full {% if errors.url %}field-err{% endif %}">
+      <label class="form-label" id="url-label">URL <span class="req">*</span></label>
+      <input type="url" name="url" class="form-control"
+             value="{{ d.url|default:'' }}"
+             id="id_url"
+             placeholder="https://youtube.com/watch?v=...  or  https://drive.google.com/...">
+      <span class="form-hint" id="url-hint">
+        {% if d.content_type == 'pdf' %}
+          Direct PDF link or Google Drive share URL.
+        {% else %}
+          YouTube URL or embed link.
+        {% endif %}
+      </span>
+      {% if errors.url %}<span class="form-error">{{ errors.url }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Thumbnail URL</label>
+      <input type="url" name="thumbnail_url" class="form-control"
+             value="{{ d.thumbnail_url|default:'' }}"
+             placeholder="https://img.youtube.com/vi/VIDEO_ID/hqdefault.jpg">
+      <span class="form-hint">Optional cover image. Leave blank — YouTube thumbnails are auto-detected.</span>
+    </div>
+
+    <div class="form-group {% if errors.duration_min %}field-err{% endif %}" id="duration-row">
+      <label class="form-label">Duration (minutes)</label>
+      <input type="number" name="duration_min" class="form-control"
+             value="{{ d.duration_min|default:'' }}"
+             min="1" step="1" placeholder="e.g. 45">
+      <span class="form-hint">For videos only. Shown as "45m" or "1h 20m" on listing cards.</span>
+      {% if errors.duration_min %}<span class="form-error">{{ errors.duration_min }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Sort Order</label>
+      <input type="number" name="sort_order" class="form-control"
+             value="{{ d.sort_order|default:0 }}" min="0" step="1">
+      <span class="form-hint">Lower = appears first.</span>
+    </div>
+
+  </div>
+</div>
+
+<div class="form-card">
+  <div class="form-section-title">Visibility</div>
+  <div class="check-group" style="margin-bottom:16px">
+    <label class="check-item">
+      <input type="checkbox" name="is_active"
+             {% if d.is_active or not item %}checked{% endif %}>
+      Active — visible to users on the free content page and homepage counter
+    </label>
+  </div>
+  <span class="form-hint" style="display:block;margin-bottom:20px">
+    Inactive items are hidden from users but kept in the database.
+    The homepage counter (<em>"{{ video_count }}+ videos"</em>) only counts active items.
+  </span>
+  <div class="form-actions">
+    <button type="submit" class="btn-save">
+      {% if item %}Save Changes{% else %}Add Item{% endif %}
+    </button>
+    <a href="{% url 'admin_free_content' %}" class="btn-cancel">Cancel</a>
+  </div>
+</div>
+
+</form>
+{% endwith %}
+</div>
+
+<script>
+function toggleDurationField(){
+  const type  = document.getElementById('id_content_type').value;
+  const row   = document.getElementById('duration-row');
+  const hint  = document.getElementById('url-hint');
+  const input = document.getElementById('id_url');
+  if(type === 'pdf'){
+    row.style.display = 'none';
+    hint.textContent  = 'Direct PDF link or Google Drive share URL.';
+    input.placeholder = 'https://drive.google.com/file/d/.../view?usp=sharing';
+  } else {
+    row.style.display = '';
+    hint.textContent  = 'YouTube URL or embed link.';
+    input.placeholder = 'https://youtube.com/watch?v=...';
+  }
+}
+document.addEventListener('DOMContentLoaded', toggleDurationField);
+</script>
+{% endblock %}

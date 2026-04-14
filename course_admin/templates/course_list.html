@@ -6,7 +6,6 @@
 <a href="{% url 'admin_course_add' %}" class="tb-btn">+ Add Course</a>
 
 {% block content %}
-<!-- Filter bar -->
 <div class="filter-bar">
   <a href="{% url 'admin_courses' %}" class="filter-pill {% if not status_filter %}active{% endif %}">All</a>
   {% for val, label in status_choices %}
