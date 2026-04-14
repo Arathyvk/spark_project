@@ -1,0 +1,196 @@
+{% extends "admin_base.html" %}
+{% block title %}{% if cls %}Edit Class{% else %}Add Class{% endif %}{% endblock %}
+{% block nav_classes %}active{% endblock %}
+{% block page_title %}{% if cls %}Edit Class{% else %}Add Class{% endif %}{% endblock %}
+{% block page_sub %}{% if cls %}Update details for this class{% else %}Create a new live or recorded class{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+    <a href="{% url 'admin_classes' %}" class="tb-btn outline">← Back to Classes</a>
+
+{% with d=post|default:cls %}
+
+<div class="breadcrumb">
+  <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+  <span>›</span>
+  <a href="{% url 'admin_classes' %}">Classes</a>
+  <span>›</span>
+  <span>{% if cls %}Edit{% else %}Add{% endif %}</span>
+</div>
+
+<!-- Live Now info box -->
+<div class="alert alert-info" style="margin-bottom:16px">
+  <span>ℹ</span>
+  <span>
+    <strong>Live Now badge</strong> — automatically shown on the user side when
+    <strong>Type = Live</strong> and the current time is within ±15 minutes of the scheduled date &amp; time.
+    No manual toggle needed.
+  </span>
+</div>
+
+<form method="POST" action="{% if cls %}{% url 'admin_class_edit' cls.pk %}{% else %}{% url 'admin_class_add' %}{% endif %}">
+{% csrf_token %}
+
+<!-- ── CLASS INFO ── -->
+<div class="form-card">
+  <div class="form-section-title">Class information</div>
+  <div class="form-grid">
+
+    <div class="form-group {% if errors.subject %}field-err{% endif %}">
+      <label class="form-label">Subject <span class="req">*</span></label>
+      <input type="text" name="subject" class="form-control"
+             value="{{ d.subject|default:'' }}"
+             placeholder="e.g. Mission SCERT / KTET Category 4">
+      <span class="form-hint">Shown above the title on class cards.</span>
+      {% if errors.subject %}<span class="form-error">{{ errors.subject }}</span>{% endif %}
+    </div>
+
+    <div class="form-group {% if errors.thumb_label %}field-err{% endif %}">
+      <label class="form-label">Thumbnail Label <span class="req">*</span></label>
+      <input type="text" name="thumb_label" id="id_thumb_label" class="form-control"
+             value="{{ d.thumb_label|default:'' }}"
+             maxlength="10" placeholder="e.g. PSC, GK, MATH"
+             oninput="updateClsPreview()">
+      <span class="form-hint">Short text shown on the coloured thumbnail.</span>
+      {% if errors.thumb_label %}<span class="form-error">{{ errors.thumb_label }}</span>{% endif %}
+    </div>
+
+    <div class="form-group full {% if errors.title %}field-err{% endif %}">
+      <label class="form-label">Class Title <span class="req">*</span></label>
+      <input type="text" name="title" class="form-control"
+             value="{{ d.title|default:'' }}"
+             placeholder="e.g. Kerala History – Ancient Period Overview">
+      {% if errors.title %}<span class="form-error">{{ errors.title }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Linked Course</label>
+      <select name="course" class="form-control">
+        <option value="">— Standalone class (no course) —</option>
+        {% for c in courses %}
+        <option value="{{ c.pk }}" {% if d.course_id == c.pk or d.course.pk == c.pk %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Thumbnail colour</label>
+      <select name="thumb_style" id="id_cls_thumb" class="form-control" onchange="updateClsPreview()">
+        {% for val, label in thumb_choices %}
+        <option value="{{ val }}" {% if d.thumb_style == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <!-- mini preview -->
+      <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+        <div class="thumb-preview {% if d.thumb_style %}{{ d.thumb_style }}{% else %}ct1{% endif %}" id="cls-prev"
+             style="height:60px;width:80px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+          <div style="font-size:14px;font-weight:800;color:#FFD166" id="cls-prev-lbl">{{ d.thumb_label|default:"PSC" }}</div>
+        </div>
+        <span style="font-size:11px;color:var(--gray3)">Live preview</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── SCHEDULE ── -->
+<div class="form-card">
+  <div class="form-section-title">Schedule &amp; type</div>
+  <div class="form-grid">
+
+    <div class="form-group {% if errors.class_type %}field-err{% endif %}">
+      <label class="form-label">Type <span class="req">*</span></label>
+      <select name="class_type" id="id_class_type" class="form-control" onchange="toggleDuration()">
+        {% for val, label in type_choices %}
+        <option value="{{ val }}" {% if d.class_type == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <span class="form-hint" id="type-hint">
+        {% if d.class_type == 'live' %}
+          Live classes show the "Live Now" badge ±15 min around the scheduled time.
+        {% else %}
+          Recorded classes show the duration and upload date.
+        {% endif %}
+      </span>
+      {% if errors.class_type %}<span class="form-error">{{ errors.class_type }}</span>{% endif %}
+    </div>
+
+    <div class="form-group {% if errors.scheduled_at %}field-err{% endif %}">
+      <label class="form-label">
+        <span id="date-label">{% if d.class_type == 'live' %}Class Date &amp; Time{% else %}Upload / Publish Date{% endif %}</span>
+        <span class="req">*</span>
+      </label>
+      <input type="datetime-local" name="scheduled_at" class="form-control"
+             value="{% if d.scheduled_at %}{{ d.scheduled_at|date:'Y-m-d' }}T{{ d.scheduled_at|time:'H:i' }}{% endif %}">
+      <span class="form-hint" id="date-hint">
+        {% if d.class_type == 'live' %}Set the exact start time. Live Now badge shows ±15 min around this.{% else %}Date shown on the class card.{% endif %}
+      </span>
+      {% if errors.scheduled_at %}<span class="form-error">{{ errors.scheduled_at }}</span>{% endif %}
+    </div>
+
+    <div class="form-group {% if errors.duration_min %}field-err{% endif %}" id="duration-group">
+      <label class="form-label">Duration (minutes)</label>
+      <input type="number" name="duration_min" class="form-control"
+             value="{{ d.duration_min|default:'' }}"
+             min="1" step="1" placeholder="e.g. 90">
+      <span class="form-hint">Shown as "1h 30m" on the card. Leave blank for live classes.</span>
+      {% if errors.duration_min %}<span class="form-error">{{ errors.duration_min }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Video URL</label>
+      <input type="url" name="video_url" class="form-control"
+             value="{{ d.video_url|default:'' }}"
+             placeholder="https://youtube.com/watch?v=...">
+      <span class="form-hint">YouTube or embed link for the class recording.</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── PUBLISH ── -->
+<div class="form-card">
+  <div class="form-section-title">Visibility</div>
+  <div class="check-group" style="margin-bottom:16px">
+    <label class="check-item">
+      <input type="checkbox" name="is_published" {% if d.is_published %}checked{% endif %}>
+      Publish this class (visible to users on the landing page and class list)
+    </label>
+  </div>
+  <span class="form-hint" style="display:block;margin-bottom:20px">
+    Unpublished classes are saved as drafts and not shown to users.
+  </span>
+  <div class="form-actions">
+    <button type="submit" class="btn-save">{% if cls %}Save Changes{% else %}Create Class{% endif %}</button>
+    <a href="{% url 'admin_classes' %}" class="btn-cancel">Cancel</a>
+  </div>
+</div>
+
+</form>
+{% endwith %}
+</div>
+
+<script>
+function updateClsPreview(){
+  const lbl   = document.getElementById('id_thumb_label').value || 'PSC';
+  const style = document.getElementById('id_cls_thumb').value   || 'ct1';
+  document.getElementById('cls-prev-lbl').textContent = lbl;
+  document.getElementById('cls-prev').className = 'thumb-preview ' + style;
+}
+function toggleDuration(){
+  const type     = document.getElementById('id_class_type').value;
+  const hint     = document.getElementById('type-hint');
+  const dlbl     = document.getElementById('date-label');
+  const dhint    = document.getElementById('date-hint');
+  if(type === 'live'){
+    hint.textContent  = 'Live classes show the "Live Now" badge ±15 min around the scheduled time.';
+    dlbl.textContent  = 'Class Date & Time ';
+    dhint.textContent = 'Set the exact start time. Live Now badge shows ±15 min around this.';
+  } else {
+    hint.textContent  = 'Recorded classes show the duration and upload date.';
+    dlbl.textContent  = 'Upload / Publish Date ';
+    dhint.textContent = 'Date shown on the class card.';
+  }
+}
+</script>
+{% endblock %}
