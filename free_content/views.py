@@ -1,13 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.db.models import Avg, Count, Sum
-from django.utils import timezone
-from functools import wraps
  
-from landing.models import (Course,FreeContent)
+from free_content.models import FreeContent
 from admin_side.views import admin_required
-
+from course_admin.models import Course
 
 @admin_required
 def free_content_list(request):
@@ -112,7 +108,6 @@ def free_content_delete(request, pk):
  
 @admin_required
 def free_content_toggle(request, pk):
-    """Quick active/inactive toggle from the list view."""
     item = get_object_or_404(FreeContent, pk=pk)
     item.is_active = not item.is_active
     item.save(update_fields=["is_active"])

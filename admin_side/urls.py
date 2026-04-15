@@ -12,9 +12,6 @@ urlpatterns = [
     path("banners/<int:pk>/edit/",        views.banner_edit,   name="admin_banner_edit"),
     path("banners/<int:pk>/toggle/",      views.banner_toggle, name="admin_banner_toggle"),
 
-    # reviews
-    path("reviews/",              views.review_list,  name="admin_reviews"),
-    path("reviews/<int:pk>/action/", views.review_action, name="admin_review_action"),
 
     # users
     path("users/",                views.user_list,    name="admin_users"),

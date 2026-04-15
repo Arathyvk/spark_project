@@ -3,8 +3,13 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count
 from django.contrib import messages
 
-from landing.models import Banner, Category, Course, LiveClass, FreeContent, Review, Enrollment, Order
-
+from landing.models import User
+from banner_admin.models import Banner
+from course_admin.models import Course, Category
+from free_content.models import FreeContent
+from class_admin.models import LiveClass
+from landing.models import  Enrollment
+from review_admin.models import Review
 
 
 def landing(request):

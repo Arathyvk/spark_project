@@ -8,4 +8,6 @@ urlpatterns = [
     path('course_admin/', include('course_admin.urls')),
     path('class_admin/', include('class_admin.urls')),
     path('free_content/', include('free_content.urls')),
+    path('review_admin/', include('review_admin.urls')),
+    path('banner_admin/', include('banner_admin.urls')),
 ]

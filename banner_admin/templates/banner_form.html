@@ -1,0 +1,157 @@
+{% extends "spark_admin/base.html" %}
+{% block title %}{% if banner %}Edit Banner{% else %}Add Banner{% endif %}{% endblock %}
+{% block nav_banners %}active{% endblock %}
+{% block page_title %}{% if banner %}Edit Banner{% else %}Add Banner{% endif %}{% endblock %}
+{% block page_sub %}{% if banner %}Update "{{ banner.title }}"{% else %}Create a new homepage carousel slide{% endif %}{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'admin_banners' %}" class="tb-btn outline">← Back to Banners</a>
+{% endblock %}
+
+{% block content %}
+{% with d=post|default:banner %}
+<div class="breadcrumb">
+  <a href="{% url 'admin_dashboard' %}">Dashboard</a><span>›</span>
+  <a href="{% url 'admin_banners' %}">Banners</a><span>›</span>
+  <span>{% if banner %}Edit{% else %}Add{% endif %}</span>
+</div>
+
+<form method="POST" enctype="multipart/form-data"
+      action="{% if banner %}{% url 'admin_banner_edit' banner.pk %}{% else %}{% url 'admin_banner_add' %}{% endif %}">
+{% csrf_token %}
+
+<!-- CONTENT -->
+<div class="form-card">
+  <div class="form-section-title">Slide content</div>
+  <div class="form-grid">
+
+    <div class="form-group full {% if errors.title %}field-err{% endif %}">
+      <label class="form-label">Title <span class="req">*</span></label>
+      <input type="text" name="title" class="form-control"
+             value="{{ d.title|default:'' }}"
+             placeholder="e.g. Mission SCERT PSC 2025">
+      <span class="form-hint">Use | to create a line break: "Mission|SCERT PSC 2025"</span>
+      {% if errors.title %}<span class="form-error">{{ errors.title }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Accent word (highlighted in yellow)</label>
+      <input type="text" name="accent_word" class="form-control"
+             value="{{ d.accent_word|default:'' }}"
+             placeholder="e.g. SCERT">
+      <span class="form-hint">Must match a word in the title exactly.</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Linked Course</label>
+      <select name="course" class="form-control">
+        <option value="">— No specific course —</option>
+        {% for c in courses %}
+        <option value="{{ c.pk }}"
+          {% if d.course_id == c.pk %}selected
+          {% elif d.course and d.course.pk == c.pk %}selected{% endif %}>
+          {{ c.short_label }} – {{ c.name|truncatechars:40 }}
+        </option>
+        {% endfor %}
+      </select>
+      <span class="form-hint">CTA buttons will link to this course's page.</span>
+    </div>
+
+    <div class="form-group full">
+      <label class="form-label">Subtitle (Malayalam)</label>
+      <textarea name="subtitle_ml" class="form-control" rows="2"
+                placeholder="പഠനം ഇപ്പോൾ നിങ്ങൾക്ക് ഒരു ഭാരമല്ല…">{{ d.subtitle_ml|default:'' }}</textarea>
+      <span class="form-hint">Displayed in Noto Serif Malayalam font below the title.</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Primary CTA button text</label>
+      <input type="text" name="cta_primary" class="form-control"
+             value="{{ d.cta_primary|default:'Get This Course' }}" maxlength="60">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Secondary CTA button text</label>
+      <input type="text" name="cta_secondary" class="form-control"
+             value="{{ d.cta_secondary|default:'Know More' }}" maxlength="60">
+      <span class="form-hint">Leave blank to hide the secondary button.</span>
+    </div>
+
+    <div class="form-group full">
+      <label class="form-label">Tag chips (comma-separated)</label>
+      <input type="text" name="tags" class="form-control"
+             value="{{ d.tags|default:'' }}"
+             placeholder="Live Class, Free Content, Mock Tests">
+      <span class="form-hint">Small pill labels shown below the CTA buttons.</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- IMAGE -->
+<div class="form-card">
+  <div class="form-section-title">Background image</div>
+  {% if banner and banner.image %}
+  <div style="margin-bottom:14px;display:flex;align-items:center;gap:12px">
+    <img src="{{ banner.image.url }}" alt="Current image"
+         style="width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--bl6)">
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--gray5)">Current image</div>
+      <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--red);cursor:pointer;font-weight:600">
+        <input type="checkbox" name="image_clear" style="accent-color:var(--red)"> Remove image
+      </label>
+    </div>
+  </div>
+  {% endif %}
+  <div class="form-group">
+    <label class="form-label">{% if banner and banner.image %}Replace image{% else %}Upload image{% endif %}</label>
+    <input type="file" name="image" class="form-control" accept="image/*" style="padding:8px">
+    <span class="form-hint">Recommended: 1200×480px JPG/PNG. If omitted, the dark blue gradient is used as background.</span>
+  </div>
+</div>
+
+<!-- BADGE & PRICING -->
+<div class="form-card">
+  <div class="form-section-title">Discount badge (red pill, top-right)</div>
+  <div class="form-grid-3">
+    <div class="form-group {% if errors.badge_price %}field-err{% endif %}">
+      <label class="form-label">Sale Price (₹)</label>
+      <input type="number" name="badge_price" class="form-control"
+             value="{{ d.badge_price|default:'' }}" min="0" step="1" placeholder="499">
+      {% if errors.badge_price %}<span class="form-error">{{ errors.badge_price }}</span>{% endif %}
+    </div>
+    <div class="form-group {% if errors.badge_original %}field-err{% endif %}">
+      <label class="form-label">Original Price (₹)</label>
+      <input type="number" name="badge_original" class="form-control"
+             value="{{ d.badge_original|default:'' }}" min="0" step="1" placeholder="3000">
+      <span class="form-hint">Crossed-out price. % discount auto-calculated.</span>
+      {% if errors.badge_original %}<span class="form-error">{{ errors.badge_original }}</span>{% endif %}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Sort Order</label>
+      <input type="number" name="sort_order" class="form-control"
+             value="{{ d.sort_order|default:0 }}" min="0" step="1">
+      <span class="form-hint">Lower = shown first. Can also drag-to-reorder from list.</span>
+    </div>
+  </div>
+</div>
+
+<div class="form-card">
+  <div class="form-section-title">Visibility</div>
+  <div class="check-group" style="margin-bottom:16px">
+    <label class="check-item">
+      <input type="checkbox" name="is_active" {% if d.is_active %}checked{% endif %}>
+      Active — show in the homepage carousel
+    </label>
+  </div>
+  <span class="form-hint" style="display:block;margin-bottom:20px">
+    Only active banners appear in the carousel. Inactive banners are saved but hidden from users.
+  </span>
+  <div class="form-actions">
+    <button type="submit" class="btn-save">{% if banner %}Save Changes{% else %}Create Banner{% endif %}</button>
+    <a href="{% url 'admin_banners' %}" class="btn-cancel">Cancel</a>
+  </div>
+</div>
+
+</form>
+{% endwith %}
+{% endblock %}
