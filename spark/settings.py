@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'course_admin',
     'class_admin',
     'free_content',
+    'review_admin',
+    'banner_admin',
 
 
 ]

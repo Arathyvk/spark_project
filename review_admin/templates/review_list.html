@@ -1,0 +1,162 @@
+{% extends "admin_base.html" %}
+{% block title %}Review Moderation{% endblock %}
+{% block nav_reviews %}active{% endblock %}
+{% block page_title %}Review Moderation{% endblock %}
+{% block page_sub %}Approve, reject or flag user reviews — only Approved reviews are shown publicly{% endblock %}
+
+{% block content %}
+<style>
+.rev-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:800px){.rev-stats{grid-template-columns:repeat(2,1fr)}}
+.rev-stat{background:white;border:1px solid var(--bl6);border-radius:12px;padding:16px;text-align:center}
+.rs-num{font-size:24px;font-weight:800}
+.rs-lbl{font-size:11px;color:var(--gray3);font-weight:500;margin-top:2px}
+.rs-n-pending{color:var(--gold)}.rs-n-approved{color:var(--green)}.rs-n-rejected{color:var(--red)}.rs-n-flagged{color:#7C3AED}.rs-n-avg{color:var(--bl)}
+
+.rev-card{background:white;border:1px solid var(--bl6);border-radius:12px;padding:18px 20px;margin-bottom:12px}
+.rev-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.rev-author-row{display:flex;align-items:center;gap:10px}
+.rev-ava{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;flex-shrink:0;background:var(--bl2)}
+.rev-author-name{font-size:13px;font-weight:700;color:var(--gray5)}
+.rev-author-meta{font-size:11px;color:var(--gray3);margin-top:2px}
+.rev-right{text-align:right;flex-shrink:0}
+.rev-stars{font-size:15px;color:var(--gold);letter-spacing:1px}
+.rev-star-off{color:var(--gray200)}
+.rev-date{font-size:10px;color:var(--gray3);margin-top:3px}
+
+.rev-comment{font-size:13px;color:var(--gray4);line-height:1.7;font-style:italic;margin-bottom:14px;padding:10px 14px;background:var(--gray50);border-radius:8px;border-left:3px solid var(--bl6)}
+
+.rev-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.rv-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px}
+.rvb-pending{background:var(--goldlt);color:var(--gold)}
+.rvb-approved{background:var(--greenlt);color:var(--green)}
+.rvb-rejected{background:var(--redlt);color:var(--red)}
+.rvb-flagged{background:#EDE9FE;color:#7C3AED}
+.rv-helpful{font-size:11px;color:var(--gray3);font-weight:500}
+.rv-course{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;background:var(--bl7);color:var(--bl)}
+
+.action-form{background:var(--gray50);border:1px solid var(--gray2);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.action-form-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.action-note{width:100%;padding:8px 11px;border:1.5px solid var(--bl6);border-radius:7px;font-family:inherit;font-size:12px;color:var(--gray5);background:white;outline:none;resize:none}
+.action-note:focus{border-color:var(--bl2)}
+.btn-approve{background:var(--green);color:white;border:none;border-radius:7px;padding:7px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.btn-reject{background:var(--red);color:white;border:none;border-radius:7px;padding:7px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.btn-flag{background:#7C3AED;color:white;border:none;border-radius:7px;padding:7px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.btn-helpful{background:var(--bl7);color:var(--bl);border:none;border-radius:7px;padding:7px 14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+
+.helpful-edit{display:flex;align-items:center;gap:6px}
+.helpful-input{width:70px;padding:6px 8px;border:1.5px solid var(--bl6);border-radius:7px;font-family:inherit;font-size:12px;text-align:center;background:white;outline:none}
+.helpful-input:focus{border-color:var(--bl2)}
+</style>
+
+<div class="rev-stats">
+  <div class="rev-stat">
+    <div class="rs-num rs-n-pending">{{ agg.total_pending|default:0 }}</div>
+    <div class="rs-lbl">Pending</div>
+  </div>
+  <div class="rev-stat">
+    <div class="rs-num rs-n-approved">{{ agg.total_approved|default:0 }}</div>
+    <div class="rs-lbl">Approved (public)</div>
+  </div>
+  <div class="rev-stat">
+    <div class="rs-num rs-n-avg">{{ agg.avg_rating|floatformat:1|default:"—" }} ★</div>
+    <div class="rs-lbl">Avg. approved rating</div>
+  </div>
+  <div class="rev-stat">
+    <div class="rs-num rs-n-flagged">{{ agg.total_flagged|default:0 }}</div>
+    <div class="rs-lbl">Flagged</div>
+  </div>
+</div>
+
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">
+  {% for val, label in status_choices %}
+  <a href="{% url 'admin_reviews' %}?status={{ val }}"
+     class="filter-pill {% if status_filter == val %}active{% endif %}">
+    {{ label }}
+    {% if val == 'pending' and agg.total_pending %}<span style="background:var(--red);color:white;border-radius:10px;padding:0 5px;font-size:9px;margin-left:3px">{{ agg.total_pending }}</span>{% endif %}
+  </a>
+  {% endfor %}
+</div>
+
+{% if not reviews %}
+<div style="text-align:center;padding:48px;color:var(--gray3)">
+  <div style="font-size:32px;margin-bottom:10px">✓</div>
+  <div style="font-size:14px;font-weight:600">No {{ status_filter }} reviews</div>
+</div>
+{% endif %}
+
+{% for rev in reviews %}
+<div class="rev-card">
+  <div class="rev-card-head">
+    <div class="rev-author-row">
+      <div class="rev-ava">{{ rev.user.full_name|first }}</div>
+      <div>
+        <div class="rev-author-name">{{ rev.user.full_name }}</div>
+        <div class="rev-author-meta">
+          {{ rev.user.email }}
+          {% if rev.user.district %} · {{ rev.user.district }}{% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="rev-right">
+      <div class="rev-stars">
+        {% for i in "12345" %}
+          {% if forloop.counter <= rev.rating %}★{% else %}<span class="rev-star-off">★</span>{% endif %}
+        {% endfor %}
+      </div>
+      <div class="rev-date">{{ rev.created_at|date:"M j, Y · g:i A" }}</div>
+    </div>
+  </div>
+
+  <div class="rev-meta-row">
+    <span class="rv-badge rvb-{{ rev.status }}">{{ rev.get_status_display }}</span>
+    <span class="rv-course">{{ rev.course.short_label }} – {{ rev.course.name|truncatechars:30 }}</span>
+    <span class="rv-helpful">👍 {{ rev.helpful_count }} helpful</span>
+    {% if rev.moderated_at %}
+    <span style="font-size:10px;color:var(--gray3)">Moderated: {{ rev.moderated_at|date:"M j, Y" }}</span>
+    {% endif %}
+  </div>
+
+  <div class="rev-comment">"{{ rev.comment }}"</div>
+
+  {% if rev.admin_note %}
+  <div style="font-size:11px;color:var(--gray3);background:var(--goldlt);padding:7px 11px;border-radius:7px;margin-bottom:12px">
+    <strong>Admin note:</strong> {{ rev.admin_note }}
+  </div>
+  {% endif %}
+
+  <div class="action-form">
+
+    <form method="POST" action="{% url 'admin_review_action' rev.pk %}">
+      {% csrf_token %}
+      <textarea name="admin_note" class="action-note" rows="2"
+                placeholder="Optional internal note (reason for rejection / flag) — not shown to the user…">{{ rev.admin_note }}</textarea>
+      <div class="action-form-row" style="margin-top:8px">
+        {% if rev.status != 'approved' %}
+        <button type="submit" name="action" value="approve" class="btn-approve">✓ Approve</button>
+        {% endif %}
+        {% if rev.status != 'rejected' %}
+        <button type="submit" name="action" value="reject"  class="btn-reject">✕ Reject</button>
+        {% endif %}
+        {% if rev.status != 'flagged' %}
+        <button type="submit" name="action" value="flag"    class="btn-flag">⚑ Flag</button>
+        {% endif %}
+      </div>
+    </form>
+
+    <form method="POST" action="{% url 'admin_review_action' rev.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="edit_helpful">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--gray4);font-weight:600">Edit helpful count:</span>
+        <input type="number" name="helpful_count"
+               class="helpful-input"
+               value="{{ rev.helpful_count }}" min="0" step="1">
+        <button type="submit" class="btn-helpful">Update</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils.text import slugify
  
-from landing.models import ( Category, Course)
+from course_admin.models import  Category, Course
 from admin_side.views import admin_required
  
 

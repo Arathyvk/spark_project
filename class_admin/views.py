@@ -1,13 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count, Avg
-from django.utils import timezone
 from django.contrib import messages
-from django.utils.text import slugify
-from functools import wraps
  
-from landing.models import (Course, LiveClass,)
+from course_admin.models import Course
+from class_admin.models import LiveClass
 from admin_side.views import admin_required
 
 

@@ -1,0 +1,131 @@
+<!-- ══════════════════════════ BANNER LIST ══════════════════════════ -->
+{% extends "spark_admin/base.html" %}
+{% block title %}Banners{% endblock %}
+{% block nav_banners %}active{% endblock %}
+{% block page_title %}Banner Manager{% endblock %}
+{% block page_sub %}Drag to reorder · Toggle active/inactive · Only active banners show in carousel{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'admin_banner_add' %}" class="tb-btn">+ Add Banner</a>
+{% endblock %}
+
+{% block content %}
+<style>
+.banner-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.bs{background:white;border:1px solid var(--bl6);border-radius:12px;padding:16px;text-align:center}
+.bs-n{font-size:24px;font-weight:800}.bs-l{font-size:11px;color:var(--gray3);margin-top:2px}
+.bn-n-active{color:var(--green)}.bn-n-inactive{color:var(--gray3)}.bn-n-total{color:var(--bl)}
+
+.bn-list{display:flex;flex-direction:column;gap:10px}
+.bn-item{
+  background:white;border:1px solid var(--bl6);border-radius:12px;
+  padding:14px 16px;display:flex;gap:14px;align-items:center;
+  cursor:grab;transition:.15s;
+}
+.bn-item:hover{box-shadow:0 4px 16px rgba(4,44,83,.1)}
+.bn-drag{color:var(--gray3);font-size:16px;cursor:grab;flex-shrink:0;padding:0 4px}
+.bn-preview{
+  width:80px;height:54px;border-radius:8px;overflow:hidden;
+  flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center;
+}
+.bp-img{width:100%;height:100%;object-fit:cover}
+.bp-grad{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#FFD166}
+.bg1{background:linear-gradient(145deg,#042C53,#1565C0)}
+.bg2{background:linear-gradient(145deg,#1a237e,#3949AB)}
+.bg3{background:linear-gradient(145deg,#004D40,#00796B)}
+.bg4{background:linear-gradient(145deg,#880E4F,#C2185B)}
+.bn-info{flex:1;min-width:0}
+.bn-ttl{font-size:13px;font-weight:700;color:var(--gray5)}
+.bn-meta{font-size:10px;color:var(--gray3);margin-top:2px}
+.bn-tags-row{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.bntag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.1);border:1px solid var(--bl6);color:var(--gray4)}
+.bn-acts{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.status-toggle{
+  display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;
+  font-size:10px;font-weight:700;cursor:pointer;border:none;transition:.15s;
+  text-decoration:none;
+}
+.st-on{background:var(--greenlt);color:var(--green)}.st-off{background:var(--gray2);color:var(--gray3)}
+.sort-badge{font-size:10px;font-weight:700;background:var(--bl7);color:var(--bl);padding:3px 8px;border-radius:6px}
+</style>
+
+<div class="banner-stats">
+  <div class="bs"><div class="bs-n bn-n-total">{{ banners|length }}</div><div class="bs-l">Total banners</div></div>
+  <div class="bs"><div class="bs-n bn-n-active">{{ active_count }}</div><div class="bs-l">Active (in carousel)</div></div>
+  <div class="bs"><div class="bs-n bn-n-inactive">{{ banners|length|add:"-"|add:active_count }}</div><div class="bs-l">Inactive (hidden)</div></div>
+</div>
+
+<div class="card">
+  <div class="card-hd">
+    <span class="card-title">{{ banners|length }} banner{{ banners|length|pluralize }}</span>
+    <a href="{% url 'admin_banner_add' %}" class="card-action">+ Add Banner</a>
+  </div>
+  <div style="padding:12px 14px">
+    <div class="bn-list" id="banner-list">
+      {% for b in banners %}
+      <div class="bn-item" data-id="{{ b.pk }}">
+        <div class="bn-drag" title="Drag to reorder">⠿</div>
+        <div class="bn-preview">
+          {% if b.image %}
+            <img class="bp-img" src="{{ b.image.url }}" alt="{{ b.title }}">
+          {% else %}
+            <div class="bp-grad bg{{ forloop.counter|default:1 }}">{{ b.title|truncatechars:5 }}</div>
+          {% endif %}
+        </div>
+        <div class="bn-info">
+          <div class="bn-ttl">
+            {{ b.title }}
+            {% if b.course %}<span style="font-size:10px;font-weight:600;color:var(--bl2);margin-left:6px">→ {{ b.course.short_label }}</span>{% endif %}
+          </div>
+          <div class="bn-meta">
+            Sort: {{ b.sort_order }}
+            {% if b.badge_price %} · ₹{{ b.badge_price|floatformat:0 }}{% if b.badge_original %} (was ₹{{ b.badge_original|floatformat:0 }}){% endif %}{% endif %}
+            {% if b.subtitle_ml %} · Has Malayalam subtitle{% endif %}
+          </div>
+          {% if b.tag_list %}
+          <div class="bn-tags-row">
+            {% for t in b.tag_list %}<span class="bntag">{{ t }}</span>{% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        <div class="bn-acts">
+          <a href="{% url 'admin_banner_toggle' b.pk %}"
+             class="status-toggle {% if b.is_active %}st-on{% else %}st-off{% endif %}">
+            {% if b.is_active %}● Active{% else %}○ Inactive{% endif %}
+          </a>
+          <a href="{% url 'admin_banner_edit' b.pk %}" class="act act-bl">Edit</a>
+          <form method="POST" action="{% url 'admin_banner_delete' b.pk %}" style="display:inline"
+                onsubmit="return confirm('Delete banner: {{ b.title }}?')">
+            {% csrf_token %}
+            <button type="submit" class="act act-rd">Del</button>
+          </form>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:40px;color:var(--gray3)">
+        No banners yet. <a href="{% url 'admin_banner_add' %}" style="color:var(--bl)">Add one →</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  const list = document.getElementById('banner-list');
+  if(!list) return;
+  let dragging = null;
+  list.querySelectorAll('.bn-item').forEach(item=>{
+    item.addEventListener('dragstart', e=>{ dragging=item; item.style.opacity='.4'; e.dataTransfer.effectAllowed='move'; });
+    item.addEventListener('dragend',   ()=>{ dragging=null; item.style.opacity=''; saveOrder(); });
+    item.addEventListener('dragover',  e=>{ e.preventDefault(); if(dragging && dragging!==item){ const rect=item.getBoundingClientRect(); const mid=rect.top+rect.height/2; if(e.clientY<mid) list.insertBefore(dragging,item); else list.insertBefore(dragging,item.nextSibling); } });
+    item.setAttribute('draggable','true');
+  });
+  function saveOrder(){
+    const items=[...list.querySelectorAll('.bn-item')].map((el,i)=>({id:+el.dataset.id,sort_order:i}));
+    fetch('{% url "admin_banner_reorder" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},body:JSON.stringify(items)});
+  }
+})();
+</script>
+{% endblock %}

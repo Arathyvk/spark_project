@@ -1,13 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Avg
 from django.utils import timezone
-from django.http import JsonResponse
 from django.contrib import messages
 from functools import wraps
+from django.contrib.auth import authenticate, login
 
-from landing.models import (User, Banner, Category, Course, LiveClass,FreeContent, Order, Enrollment, Review)
+
+
+from landing.models import User
+from banner_admin.models import Banner
+from course_admin.models import Course
+from class_admin.models import LiveClass
+from landing.models import Order, Enrollment
+from review_admin.models import Review
 
 
 
@@ -30,7 +36,7 @@ def admin_login(request):
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "")
 
-        user = authenticate(request, email=email, password=password)
+        user = authenticate(request, username=email, password=password)        
         print(user)
 
         if user is not None and user.is_staff:
@@ -119,64 +125,6 @@ def banner_edit(request, pk=None):
     return render(request, "banner_form.html", {"banner": banner, "courses": courses})
 
 
-# ─── REVIEWS ─────────────────────────────────────────────────────────────────
-
-@admin_required
-def review_list(request):
-    status_filter = request.GET.get("status","pending")
-    reviews = Review.objects.filter(status=status_filter).select_related("user","course").order_by("-created_at")
-    return render(request, "reviews.html", {"reviews": reviews, "status_filter": status_filter})
-
-
-@admin_required
-def review_action(request, pk):
-    review = get_object_or_404(Review, pk=pk)
-    action = request.POST.get("action")
-    if action == "approve":
-        review.status      = "approved"
-        review.approved_at = timezone.now()
-        review.save()
-        messages.success(request, "Review approved.")
-    elif action == "reject":
-        review.status = "rejected"
-        review.save()
-        messages.info(request, "Review rejected.")
-    return redirect(request.META.get("HTTP_REFERER", "admin_reviews"))
-
-
-# ─── CLASSES ─────────────────────────────────────────────────────────────────
-
-@admin_required
-def class_list(request):
-    classes = LiveClass.objects.select_related("course").order_by("-scheduled_at")
-    return render(request, "spark_admin/classes.html", {"classes": classes})
-
-
-@admin_required
-def class_edit(request, pk=None):
-    cls     = get_object_or_404(LiveClass, pk=pk) if pk else None
-    courses = Course.objects.filter(status="active")
-
-    if request.method == "POST":
-        data = request.POST
-        if not cls:
-            cls = LiveClass()
-        cid = data.get("course")
-        cls.course_id    = cid if cid else None
-        cls.subject      = data.get("subject","")
-        cls.title        = data.get("title","")
-        cls.thumb_label  = data.get("thumb_label","")
-        cls.thumb_style  = data.get("thumb_style","ct1")
-        cls.class_type   = data.get("class_type","recorded")
-        cls.scheduled_at = data.get("scheduled_at")
-        cls.duration_min = data.get("duration_min") or None
-        cls.video_url    = data.get("video_url","")
-        cls.is_published = "is_published" in data
-        cls.save()
-        messages.success(request, "Class saved.")
-        return redirect("admin_classes")
-
-    return render(request, "class_form.html", {"cls": cls, "courses": courses})
 
 
 # ─── USERS ───────────────────────────────────────────────────────────────────
