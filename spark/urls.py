@@ -10,4 +10,5 @@ urlpatterns = [
     path('free_content/', include('free_content.urls')),
     path('review_admin/', include('review_admin.urls')),
     path('banner_admin/', include('banner_admin.urls')),
+    path('user_admin/', include('user_admin.urls')),
 ]

@@ -1,8 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from django.db.models import Avg, Count
-
-
+from django.db.models import Avg
+from course_admin.models import Course
 
 class Review(models.Model):
     STATUS_CHOICES = [
@@ -17,11 +16,7 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name="reviews"
     )
-    course  = models.ForeignKey(
-        "course_admin.Course",
-        on_delete=models.CASCADE,
-        related_name="reviews"
-    )
+    course  = models.ForeignKey(Course,on_delete=models.CASCADE,related_name="reviews")
  
     rating        = models.PositiveSmallIntegerField(
         help_text="Integer 1–5."

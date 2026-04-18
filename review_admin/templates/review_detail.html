@@ -3,9 +3,11 @@
 {% block nav_reviews %}active{% endblock %}
 {% block page_title %}Review Detail{% endblock %}
 {% block page_sub %}Full view — moderate and edit helpful count{% endblock %}
-  <a href="{% url 'admin_reviews' %}" class="tb-btn outline">← Back to Reviews</a>
 
 {% block content %}
+<div class="page-wrap">
+  <a href="{% url 'admin_reviews' %}" class="tb-btn outline">← Back to Reviews</a>
+
 <style>
 .detail-grid{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start}
 @media(max-width:800px){.detail-grid{grid-template-columns:1fr}}
@@ -123,5 +125,6 @@
     </div>
 
   </div>
+</div>
 </div>
 {% endblock %}

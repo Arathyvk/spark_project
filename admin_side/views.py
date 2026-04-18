@@ -127,12 +127,3 @@ def banner_edit(request, pk=None):
 
 
 
-# ─── USERS ───────────────────────────────────────────────────────────────────
-
-@admin_required
-def user_list(request):
-    users = User.objects.filter(role="user").annotate(
-        enroll_count=Count("enrollments"),
-        order_count=Count("orders"),
-    ).order_by("-created_at")
-    return render(request, "users.html", {"users": users})

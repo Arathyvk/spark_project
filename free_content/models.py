@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
- 
+from course_admin.models import Course
+
  
  
 class FreeContent(models.Model):
@@ -9,10 +10,7 @@ class FreeContent(models.Model):
         ("pdf",   "PDF"),
     ]
  
-    course       = models.ForeignKey(
-        "course_admin.Course",
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
+    course       = models.ForeignKey(Course, on_delete=models.SET_NULL,null=True, blank=True,
         related_name="free_content",
         help_text="Leave blank for standalone free content not tied to any course."
     )

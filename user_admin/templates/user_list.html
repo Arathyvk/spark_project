@@ -1,0 +1,82 @@
+{% extends "admin_base.html" %}
+{% block title %}Users{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block page_title %}Users & Orders{% endblock %}
+{% block page_sub %}All registered students — click a user to view enrollments and grant/revoke access{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <a href="{% url 'admin_orders' %}" class="tb-btn outline">View Orders</a>
+
+<style>
+.user-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.us{background:white;border:1px solid var(--bl6);border-radius:12px;padding:16px;text-align:center}
+.us-n{font-size:24px;font-weight:800;color:var(--bl)}.us-l{font-size:11px;color:var(--gray3);margin-top:2px}
+.search-bar{display:flex;gap:8px;margin-bottom:16px}
+.search-input{flex:1;padding:9px 14px;border:1.5px solid var(--bl6);border-radius:9px;font-family:inherit;font-size:13px;background:var(--bl8);outline:none;color:var(--gray5)}
+.search-input:focus{border-color:var(--bl2);background:white}
+.search-btn{background:var(--bl);color:white;border:none;border-radius:9px;padding:9px 20px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.enroll-bar{display:flex;gap:2px;align-items:center}
+.eb-dot{width:8px;height:8px;border-radius:50%}
+</style>
+
+<div class="user-stats">
+  <div class="us"><div class="us-n">{{ total_users }}</div><div class="us-l">Total students</div></div>
+  <div class="us"><div class="us-n">{{ total_enrolled }}</div><div class="us-l">Active enrollments</div></div>
+  <div class="us"><div class="us-n">{{ users|length }}</div><div class="us-l">Showing (current filter)</div></div>
+</div>
+
+<form method="GET" action="{% url 'admin_users' %}">
+  <div class="search-bar">
+    <input type="text" name="q" class="search-input"
+           value="{{ search }}" placeholder="Search by name or email…">
+    <button type="submit" class="search-btn">Search</button>
+    {% if search %}<a href="{% url 'admin_users' %}" class="act act-rd" style="padding:9px 14px">Clear</a>{% endif %}
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-hd">
+    <span class="card-title">{{ users|length }} user{{ users|length|pluralize }}</span>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>District</th><th>Enrollments</th><th>Orders</th><th>Joined</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <div style="font-weight:700;color:var(--gray5)">{{ u.full_name }}</div>
+            {% if u.phone %}<div style="font-size:10px;color:var(--gray3)">{{ u.phone }}</div>{% endif %}
+          </td>
+          <td style="font-size:11px;color:var(--bl2)">{{ u.email }}</td>
+          <td style="font-size:11px">{{ u.district|default:"—" }}</td>
+          <td>
+            {% if u.enroll_count %}
+              <span style="font-weight:700;color:var(--green)">{{ u.enroll_count }}</span>
+            {% else %}
+              <span style="color:var(--gray3)">0</span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-weight:600">{{ u.paid_orders }}</span>
+            {% if u.order_count != u.paid_orders %}
+            <span style="font-size:10px;color:var(--gray3)"> / {{ u.order_count }}</span>
+            {% endif %}
+          </td>
+          <td style="font-size:11px;color:var(--gray3)">{{ u.created_at|date:"M j, Y" }}</td>
+          <td>
+            <a href="{% url 'admin_user_detail' u.pk %}" class="act act-bl">View</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray3)">No users found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+{% endblock %}

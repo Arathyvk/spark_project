@@ -1,4 +1,4 @@
-{% extends "spark_admin/base.html" %}
+{% extends "admin_base.html" %}
 {% block title %}{% if banner %}Edit Banner{% else %}Add Banner{% endif %}{% endblock %}
 {% block nav_banners %}active{% endblock %}
 {% block page_title %}{% if banner %}Edit Banner{% else %}Add Banner{% endif %}{% endblock %}
@@ -19,7 +19,6 @@
       action="{% if banner %}{% url 'admin_banner_edit' banner.pk %}{% else %}{% url 'admin_banner_add' %}{% endif %}">
 {% csrf_token %}
 
-<!-- CONTENT -->
 <div class="form-card">
   <div class="form-section-title">Slide content</div>
   <div class="form-grid">
@@ -87,7 +86,6 @@
   </div>
 </div>
 
-<!-- IMAGE -->
 <div class="form-card">
   <div class="form-section-title">Background image</div>
   {% if banner and banner.image %}
@@ -109,7 +107,6 @@
   </div>
 </div>
 
-<!-- BADGE & PRICING -->
 <div class="form-card">
   <div class="form-section-title">Discount badge (red pill, top-right)</div>
   <div class="form-grid-3">
