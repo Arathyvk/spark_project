@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'free_content',
     'review_admin',
     'banner_admin',
+    'user_admin',
 
 
 ]

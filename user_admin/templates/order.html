@@ -1,0 +1,612 @@
+{% extends "admin_base.html" %}
+{% block title %}Orders{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block page_title %}Orders{% endblock %}
+{% block page_sub %}All payment records — filter by status · search by user or course{% endblock %}
+
+
+{% block content %}
+  <a href="{% url 'admin_users' %}" class="tb-btn outline">← Users</a>
+
+
+<style>
+.order-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+@media(max-width:900px){ .order-stats{ grid-template-columns: repeat(3,1fr); } }
+@media(max-width:540px){ .order-stats{ grid-template-columns: repeat(2,1fr); } }
+
+.os-card {
+  background: white;
+  border: 1px solid var(--bl6);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.os-info .os-lbl { font-size: 11px; color: var(--gray3); font-weight: 500; margin-bottom: 4px; }
+.os-info .os-val { font-size: 20px; font-weight: 800; color: var(--gray5); line-height: 1; }
+.os-info .os-sub { font-size: 10px; color: var(--gray3); margin-top: 3px; }
+.os-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.oi-revenue  { background: var(--bl7); }
+.oi-paid     { background: var(--greenlt); }
+.oi-pending  { background: var(--goldlt); }
+.oi-failed   { background: var(--redlt); }
+.oi-manual   { background: #EDE9FE; }
+
+.filter-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.search-box {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  min-width: 200px;
+  border: 1.5px solid var(--bl6);
+  border-radius: 9px;
+  overflow: hidden;
+  background: white;
+}
+.search-box input {
+  flex: 1;
+  padding: 9px 14px;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--gray5);
+  background: transparent;
+}
+.search-box button {
+  background: var(--bl);
+  color: white;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: .15s;
+}
+.search-box button:hover { background: var(--bldk); }
+
+.status-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.sp {
+  font-size: 11px; font-weight: 600;
+  padding: 6px 14px; border-radius: 20px;
+  border: 1.5px solid var(--bl6);
+  color: var(--gray4); text-decoration: none;
+  background: white; cursor: pointer; transition: .15s;
+  white-space: nowrap;
+}
+.sp:hover { border-color: var(--bl); color: var(--bl); }
+.sp.active { background: var(--bl); color: white; border-color: var(--bl); }
+.sp-paid.active    { background: var(--green);  border-color: var(--green); }
+.sp-pending.active { background: var(--gold);   border-color: var(--gold); color: white; }
+.sp-failed.active  { background: var(--red);    border-color: var(--red); }
+.sp-manual.active  { background: #7C3AED;       border-color: #7C3AED; }
+.sp-refunded.active{ background: var(--gray4);  border-color: var(--gray4); }
+
+.order-table-wrap { overflow-x: auto; }
+
+.order-table { width: 100%; border-collapse: collapse; min-width: 750px; }
+.order-table th {
+  font-size: 9px; font-weight: 700; color: var(--gray3);
+  text-transform: uppercase; letter-spacing: .5px;
+  padding: 10px 14px; text-align: left;
+  background: var(--gray); white-space: nowrap;
+}
+.order-table td {
+  font-size: 12px; padding: 11px 14px;
+  border-bottom: 1px solid var(--gray2);
+  color: var(--gray4); vertical-align: middle;
+}
+.order-table tr:last-child td { border-bottom: none; }
+.order-table tr:hover td { background: var(--bl8); cursor: pointer; }
+
+.oid { font-family: monospace; font-size: 11px; color: var(--bl2); font-weight: 600; }
+
+.user-cell .u-name { font-weight: 700; color: var(--gray5); font-size: 12px; }
+.user-cell .u-email { font-size: 10px; color: var(--gray3); margin-top: 1px; }
+
+/* Course cell */
+.course-cell .c-lbl { font-weight: 700; color: var(--gray5); font-size: 12px; }
+.course-cell .c-cat  { font-size: 10px; color: var(--gray3); margin-top: 1px; }
+
+.amt-cell { font-size: 13px; font-weight: 800; color: var(--gray5); white-space: nowrap; }
+.amt-free { font-size: 11px; font-weight: 600; color: var(--gray3); }
+
+.st-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+}
+.st-paid     { background: var(--greenlt); color: var(--green); }
+.st-pending  { background: var(--goldlt);  color: var(--gold); }
+.st-failed   { background: var(--redlt);   color: var(--red); }
+.st-manual   { background: #EDE9FE;        color: #7C3AED; }
+.st-refunded { background: var(--gray2);   color: var(--gray4); }
+.st-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+.pm-badge {
+  font-size: 9px; font-weight: 700;
+  padding: 2px 7px; border-radius: 5px;
+  background: var(--bl7); color: var(--bl); white-space: nowrap;
+}
+.pm-cash   { background: var(--goldlt);  color: #78350F; }
+.pm-admin  { background: #EDE9FE;        color: #7C3AED; }
+.pm-free   { background: var(--greenlt); color: var(--green); }
+
+.rzp-id {
+  font-family: monospace; font-size: 10px;
+  color: var(--gray3); max-width: 130px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: block;
+}
+
+.order-acts { display: flex; gap: 4px; }
+
+.od-overlay {
+  position: fixed; inset: 0;
+  background: rgba(4,20,44,.55);
+  backdrop-filter: blur(3px);
+  z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.od-overlay.open { opacity: 1; pointer-events: all; }
+
+.od-box {
+  background: white;
+  border-radius: 16px;
+  width: 100%; max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(4,44,83,.28);
+  transform: translateY(12px); transition: transform .2s;
+}
+.od-overlay.open .od-box { transform: translateY(0); }
+
+.od-head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--gray2);
+  display: flex; justify-content: space-between; align-items: start;
+  position: sticky; top: 0; background: white; z-index: 1;
+}
+.od-title { font-size: 15px; font-weight: 800; color: var(--bldk); }
+.od-subtitle { font-size: 11px; color: var(--gray3); margin-top: 2px; }
+.od-close {
+  background: var(--gray2); border: none; border-radius: 50%;
+  width: 28px; height: 28px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--gray4); flex-shrink: 0;
+  transition: .15s;
+}
+.od-close:hover { background: var(--redlt); color: var(--red); }
+
+.od-body { padding: 18px 20px; }
+
+.od-section { margin-bottom: 18px; }
+.od-sec-title {
+  font-size: 10px; font-weight: 700; color: var(--gray3);
+  text-transform: uppercase; letter-spacing: .6px;
+  margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--gray2);
+}
+.od-row {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; padding: 6px 0;
+  border-bottom: 1px solid var(--gray50);
+  font-size: 12px; gap: 12px;
+}
+.od-row:last-child { border-bottom: none; }
+.od-key { color: var(--gray3); font-weight: 500; flex-shrink: 0; }
+.od-val { color: var(--gray5); font-weight: 600; text-align: right; word-break: break-all; }
+.od-val.mono { font-family: monospace; font-size: 11px; }
+.od-val.blue { color: var(--bl2); }
+
+.od-amount-big {
+  text-align: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--gray2);
+  margin-bottom: 16px;
+}
+.od-amount-num { font-size: 32px; font-weight: 800; color: var(--gray5); }
+.od-amount-sub { font-size: 12px; color: var(--gray3); margin-top: 4px; }
+
+.od-grant-note {
+  background: var(--goldlt); border: 1px solid #F0C048;
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 12px; color: #78350F; line-height: 1.5;
+  margin-top: 10px;
+}
+.od-grant-note strong { display: block; margin-bottom: 3px; }
+
+.pagination {
+  display: flex; gap: 4px; justify-content: center;
+  padding: 16px 0 4px; flex-wrap: wrap;
+}
+.page-btn {
+  min-width: 32px; height: 32px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; text-decoration: none;
+  color: var(--gray4); background: white;
+  border: 1px solid var(--bl6); transition: .15s;
+}
+.page-btn:hover { background: var(--bl7); color: var(--bl); }
+.page-btn.active { background: var(--bl); color: white; border-color: var(--bl); }
+.page-btn.disabled { opacity: .4; pointer-events: none; }
+
+.export-row {
+  display: flex; gap: 8px; align-items: center;
+  padding: 10px 14px;
+  border-top: 1px solid var(--gray2);
+  background: var(--gray);
+}
+.export-lbl { font-size: 11px; color: var(--gray3); margin-right: auto; }
+</style>
+
+<div class="order-stats">
+  <div class="os-card">
+    <div class="os-info">
+      <div class="os-lbl">Total Revenue</div>
+      <div class="os-val">&#8377;{{ total_revenue|floatformat:0 }}</div>
+      <div class="os-sub">Paid + manual</div>
+    </div>
+    <div class="os-icon oi-revenue">&#128176;</div>
+  </div>
+  <div class="os-card">
+    <div class="os-info">
+      <div class="os-lbl">Paid</div>
+      <div class="os-val" style="color:var(--green)">{{ count_paid }}</div>
+      <div class="os-sub">Orders</div>
+    </div>
+    <div class="os-icon oi-paid">&#10003;</div>
+  </div>
+  <div class="os-card">
+    <div class="os-info">
+      <div class="os-lbl">Pending</div>
+      <div class="os-val" style="color:var(--gold)">{{ count_pending }}</div>
+      <div class="os-sub">Awaiting payment</div>
+    </div>
+    <div class="os-icon oi-pending">&#9203;</div>
+  </div>
+  <div class="os-card">
+    <div class="os-info">
+      <div class="os-lbl">Failed</div>
+      <div class="os-val" style="color:var(--red)">{{ count_failed }}</div>
+      <div class="os-sub">Orders</div>
+    </div>
+    <div class="os-icon oi-failed">&#10005;</div>
+  </div>
+  <div class="os-card">
+    <div class="os-info">
+      <div class="os-lbl">Manual Grants</div>
+      <div class="os-val" style="color:#7C3AED">{{ count_manual }}</div>
+      <div class="os-sub">Admin granted</div>
+    </div>
+    <div class="os-icon oi-manual">&#128273;</div>
+  </div>
+</div>
+
+<form method="GET" action="{% url 'admin_orders' %}">
+  <div class="filter-row">
+    <div class="search-box">
+      <input type="text" name="q" value="{{ search }}"
+             placeholder="Search by name, email, course or Razorpay ID…">
+      <button type="submit">Search</button>
+    </div>
+    {% if search or status_filter %}
+    <a href="{% url 'admin_orders' %}" class="act act-rd" style="padding:9px 14px;white-space:nowrap">Clear</a>
+    {% endif %}
+  </div>
+  <div class="status-pills" style="margin-bottom:16px">
+    <a href="{% url 'admin_orders' %}{% if search %}?q={{ search }}{% endif %}"
+       class="sp {% if not status_filter %}active{% endif %}">
+       All ({{ total_count }})
+    </a>
+    {% for val, label in status_choices %}
+    <a href="{% url 'admin_orders' %}?status={{ val }}{% if search %}&q={{ search }}{% endif %}"
+       class="sp sp-{{ val }} {% if status_filter == val %}active{% endif %}">
+      {{ label }}
+      {% if val == 'paid'    %}&nbsp;({{ count_paid }}){% endif %}
+      {% if val == 'pending' %}&nbsp;({{ count_pending }}){% endif %}
+      {% if val == 'failed'  %}&nbsp;({{ count_failed }}){% endif %}
+      {% if val == 'manual'  %}&nbsp;({{ count_manual }}){% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-hd">
+    <span class="card-title">
+      {{ orders|length }} order{{ orders|length|pluralize }}
+      {% if status_filter %} · {{ status_filter|title }} {% endif %}
+      {% if search %} · "{{ search }}"{% endif %}
+    </span>
+    <div style="display:flex;gap:8px">
+      <a href="{% url 'admin_orders' %}?export=csv{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&q={{ search }}{% endif %}"
+         class="act act-bl">&#8595; CSV</a>
+    </div>
+  </div>
+
+  <div class="order-table-wrap">
+    <table class="order-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Student</th>
+          <th>Course</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Status</th>
+          <th>Razorpay ID</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr onclick="openOrder({{ order.pk }})" data-order="{{ order.pk }}">
+
+          <td>
+            <div class="oid">#{{ order.pk }}</div>
+            {% if order.razorpay_order_id %}
+            <div class="rzp-id" title="{{ order.razorpay_order_id }}">{{ order.razorpay_order_id }}</div>
+            {% endif %}
+          </td>
+
+          <td>
+            <div class="user-cell">
+              <div class="u-name">{{ order.user.full_name }}</div>
+              <div class="u-email">{{ order.user.email }}</div>
+            </div>
+          </td>
+
+          <td>
+            <div class="course-cell">
+              <div class="c-lbl">{{ order.course.short_label }} – {{ order.course.name|truncatechars:28 }}</div>
+              {% if order.course.category %}
+              <div class="c-cat">{{ order.course.category.name }}</div>
+              {% endif %}
+            </div>
+          </td>
+
+          <td class="amt-cell">
+            {% if order.amount > 0 %}
+              &#8377;{{ order.amount|floatformat:0 }}
+            {% else %}
+              <span class="amt-free">Free</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <span class="pm-badge
+              {% if order.payment_method == 'cash' %}pm-cash
+              {% elif order.payment_method == 'admin' %}pm-admin
+              {% elif order.payment_method == 'free' %}pm-free
+              {% endif %}">
+              {{ order.get_payment_method_display }}
+            </span>
+          </td>
+
+          <td>
+            <span class="st-pill st-{{ order.status }}">
+              <span class="st-dot"></span>
+              {{ order.get_status_display }}
+            </span>
+            {% if order.paid_at %}
+            <div style="font-size:10px;color:var(--gray3);margin-top:2px">{{ order.paid_at|date:"M j, g:i A" }}</div>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if order.razorpay_payment_id %}
+            <span class="rzp-id" title="{{ order.razorpay_payment_id }}">{{ order.razorpay_payment_id }}</span>
+            {% else %}
+            <span style="color:var(--gray3);font-size:11px">—</span>
+            {% endif %}
+          </td>
+
+          <td style="font-size:11px;color:var(--gray3);white-space:nowrap">
+            {{ order.created_at|date:"M j, Y" }}<br>
+            <span style="font-size:10px">{{ order.created_at|time:"g:i A" }}</span>
+          </td>
+
+          <td onclick="event.stopPropagation()">
+            <div class="order-acts">
+              <button class="act act-bl" onclick="openOrder({{ order.pk }})">View</button>
+              <a href="{% url 'admin_user_detail' order.user.pk %}" class="act act-bl">User</a>
+              {% if order.status == 'pending' %}
+              <form method="POST" action="{% url 'admin_order_action' order.pk %}" style="display:inline"
+                    onsubmit="return confirm('Mark this order as paid and create enrollment?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="mark_paid">
+                <button type="submit" class="act act-gr">&#10003; Paid</button>
+              </form>
+              {% endif %}
+              {% if order.status == 'paid' or order.status == 'manual' %}
+              <form method="POST" action="{% url 'admin_order_action' order.pk %}" style="display:inline"
+                    onsubmit="return confirm('Mark as refunded? This will also revoke enrollment.')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="refund">
+                <button type="submit" class="act act-rd">Refund</button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" style="text-align:center;padding:44px;color:var(--gray3)">
+            <div style="font-size:28px;margin-bottom:10px">&#128722;</div>
+            <div style="font-size:13px;font-weight:600">No orders found</div>
+            {% if search or status_filter %}
+            <div style="font-size:12px;margin-top:4px">
+              Try clearing the filters. <a href="{% url 'admin_orders' %}" style="color:var(--bl)">Show all →</a>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if orders %}
+  <div class="export-row">
+    <span class="export-lbl">{{ orders|length }} record{{ orders|length|pluralize }} shown</span>
+    <a href="{% url 'admin_orders' %}?export=csv{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&q={{ search }}{% endif %}"
+       class="act act-bl">&#8595; Export CSV</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="od-overlay" id="order-modal">
+  <div class="od-box">
+    <div class="od-head">
+      <div>
+        <div class="od-title" id="modal-title">Order Details</div>
+        <div class="od-subtitle" id="modal-subtitle"></div>
+      </div>
+      <button class="od-close" onclick="closeOrder()">&#10005;</button>
+    </div>
+    <div class="od-body" id="modal-body">
+      <div style="text-align:center;padding:32px;color:var(--gray3)">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ORDER_DATA = {
+  {% for order in orders %}
+  {{ order.pk }}: {
+    pk:            {{ order.pk }},
+    user_name:     "{{ order.user.full_name|escapejs }}",
+    user_email:    "{{ order.user.email|escapejs }}",
+    user_phone:    "{{ order.user.phone|default:''|escapejs }}",
+    user_pk:       {{ order.user.pk }},
+    course_name:   "{{ order.course.name|escapejs }}",
+    course_label:  "{{ order.course.short_label|escapejs }}",
+    course_pk:     {{ order.course.pk }},
+    amount:        "{% if order.amount > 0 %}₹{{ order.amount|floatformat:0 }}{% else %}Free{% endif %}",
+    status:        "{{ order.get_status_display }}",
+    status_slug:   "{{ order.status }}",
+    method:        "{{ order.get_payment_method_display }}",
+    rz_order_id:   "{{ order.razorpay_order_id|default:''|escapejs }}",
+    rz_payment_id: "{{ order.razorpay_payment_id|default:''|escapejs }}",
+    rz_signature:  "{{ order.razorpay_signature|default:''|escapejs }}",
+    grant_note:    "{{ order.grant_note|default:''|escapejs }}",
+    granted_by:    "{% if order.granted_by %}{{ order.granted_by.full_name|escapejs }}{% endif %}",
+    created_at:    "{{ order.created_at|date:'M j, Y · g:i A' }}",
+    paid_at:       "{% if order.paid_at %}{{ order.paid_at|date:'M j, Y · g:i A' }}{% else %}—{% endif %}",
+    has_enrollment:"{% if order.enrollment %}Yes{% else %}No{% endif %}",
+    user_detail_url:"{% url 'admin_user_detail' order.user.pk %}",
+  }{% if not forloop.last %},{% endif %}
+  {% endfor %}
+};
+
+const STATUS_CLASSES = {
+  paid:'st-paid', pending:'st-pending', failed:'st-failed',
+  manual:'st-manual', refunded:'st-refunded'
+};
+
+function openOrder(pk){
+  const o = ORDER_DATA[pk];
+  if(!o){ return; }
+
+  document.getElementById('modal-title').textContent = 'Order #' + o.pk;
+  document.getElementById('modal-subtitle').textContent = o.user_name + ' · ' + o.course_label;
+
+  const pill = `<span class="st-pill ${STATUS_CLASSES[o.status_slug]||''}"><span class="st-dot"></span>${o.status}</span>`;
+
+  let grantSection = '';
+  if(o.status_slug === 'manual'){
+    grantSection = `
+      <div class="od-section">
+        <div class="od-sec-title">Manual Grant Details</div>
+        ${o.granted_by ? `<div class="od-row"><span class="od-key">Granted by</span><span class="od-val">${o.granted_by}</span></div>` : ''}
+        ${o.grant_note ? `<div class="od-grant-note"><strong>Note from admin:</strong>${o.grant_note}</div>` : ''}
+      </div>`;
+  }
+
+  let razorpaySection = '';
+  if(o.rz_order_id || o.rz_payment_id){
+    razorpaySection = `
+      <div class="od-section">
+        <div class="od-sec-title">Razorpay IDs</div>
+        ${o.rz_order_id   ? `<div class="od-row"><span class="od-key">Order ID</span><span class="od-val mono blue">${o.rz_order_id}</span></div>` : ''}
+        ${o.rz_payment_id ? `<div class="od-row"><span class="od-key">Payment ID</span><span class="od-val mono blue">${o.rz_payment_id}</span></div>` : ''}
+        ${o.rz_signature  ? `<div class="od-row"><span class="od-key">Signature</span><span class="od-val mono" style="font-size:9px">${o.rz_signature.slice(0,32)}…</span></div>` : ''}
+      </div>`;
+  }
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="od-amount-big">
+      <div class="od-amount-num">${o.amount}</div>
+      <div class="od-amount-sub">${o.method}</div>
+      <div style="margin-top:8px">${pill}</div>
+    </div>
+
+    <div class="od-section">
+      <div class="od-sec-title">Student</div>
+      <div class="od-row"><span class="od-key">Name</span>
+        <span class="od-val">
+          <a href="${o.user_detail_url}" style="color:var(--bl2)">${o.user_name}</a>
+        </span>
+      </div>
+      <div class="od-row"><span class="od-key">Email</span><span class="od-val blue">${o.user_email}</span></div>
+      ${o.user_phone ? `<div class="od-row"><span class="od-key">Phone</span><span class="od-val">${o.user_phone}</span></div>` : ''}
+    </div>
+
+    <div class="od-section">
+      <div class="od-sec-title">Course</div>
+      <div class="od-row"><span class="od-key">Name</span><span class="od-val">${o.course_name}</span></div>
+    </div>
+
+    <div class="od-section">
+      <div class="od-sec-title">Timeline</div>
+      <div class="od-row"><span class="od-key">Order created</span><span class="od-val">${o.created_at}</span></div>
+      <div class="od-row"><span class="od-key">Paid at</span><span class="od-val">${o.paid_at}</span></div>
+      <div class="od-row"><span class="od-key">Enrollment</span><span class="od-val">${o.has_enrollment}</span></div>
+    </div>
+
+    ${grantSection}
+    ${razorpaySection}
+
+    <div style="display:flex;gap:8px;padding-top:4px">
+      <a href="${o.user_detail_url}" class="btn btn-secondary btn-sm">View Student</a>
+    </div>
+  `;
+
+  document.getElementById('order-modal').classList.add('open');
+}
+
+function closeOrder(){
+  document.getElementById('order-modal').classList.remove('open');
+}
+
+document.getElementById('order-modal').addEventListener('click', function(e){
+  if(e.target === this) closeOrder();
+});
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeOrder();
+});
+</script>
+{% endblock %}
